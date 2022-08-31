@@ -2,14 +2,15 @@ import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/commo
 import { TaskService } from "./task.service";
 import { CreateTaskDto } from "./dto/create-task.dto";
 import { UpdateTaskDto } from "./dto/update-task.dto";
+import { createTaskResponse } from "../types";
 
 @Controller("task")
 export class TaskController {
   constructor(private readonly taskService: TaskService) {
   }
 
-  @Post()
-  create(@Body() createTaskDto: CreateTaskDto) {
+  @Post("/")
+  create(@Body() createTaskDto: CreateTaskDto): Promise<createTaskResponse> {
     return this.taskService.create(createTaskDto);
   }
 

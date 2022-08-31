@@ -1,9 +1,9 @@
 import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { TaskPriority, TaskStatus } from "../../types";
+import { taskInterface, TaskPriority, TaskStatus } from "../../types";
 import { TaskComment } from "./task-comment.entity";
 
 @Entity()
-export class Task extends BaseEntity {
+export class Task extends BaseEntity implements taskInterface {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
@@ -20,13 +20,16 @@ export class Task extends BaseEntity {
 
   @Column({
     default: TaskStatus.Reported,
-    nullable: false
+    nullable: false,
+    type: "enum",
+    enum: TaskStatus
   })
   status: TaskStatus;
 
   @Column({
-    default: TaskPriority.Low,
-    nullable: false
+    nullable: false,
+    type: "enum",
+    enum: TaskPriority
   })
   priority: TaskPriority;
 
