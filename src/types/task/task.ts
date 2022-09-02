@@ -30,5 +30,36 @@ export interface taskInterface {
   changedAt: Date;
 }
 
+export interface createTaskRequest extends taskInterface {
+}
+
+export interface findAndCountTaskRequest {
+  searchTerm: string;
+  searchStatus: TaskStatus[];
+  searchPriority: TaskPriority[];
+  searchAssignedTeam: string[];
+  searchAssignedUser: string[];
+  maxOnPage: number;
+  currentPage: number;
+}
+
+export interface updateTaskRequest
+  extends Pick<taskInterface, "status" | "priority" | "toBeConfirmBy"> {
+  assignedTeam: string[];
+  assignedUser: string[];
+  assignedTask: string[];
+}
+
 export interface createTaskResponse extends taskInterface {
+}
+
+export type findAndCountTaskResponse = {
+  tasks: taskInterface[];
+  totalPages: number;
+};
+
+export interface findOneTaskResponse extends taskInterface {
+}
+
+export interface updateTaskResponse extends taskInterface {
 }

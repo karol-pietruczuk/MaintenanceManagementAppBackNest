@@ -1,16 +1,19 @@
 import { TaskPriority } from "../../types";
-import { IsString } from "class-validator";
+import { IsNotEmpty, IsString } from "class-validator";
 
 export class CreateTaskDto {
+  @IsNotEmpty()
   @IsString()
   public name: string;
 
   @IsString()
   public description: string;
 
+  @IsNotEmpty()
   @IsString()
   public priority: TaskPriority;
 
+  @IsNotEmpty()
   @IsString()
   public createdBy: string;
 
