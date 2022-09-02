@@ -1,9 +1,11 @@
-import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { taskInterface, TaskPriority, TaskStatus } from "../../types";
+import { BaseEntity, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { TaskInterface, TaskPriority, TaskStatus } from "../../types";
 import { TaskComment } from "./task-comment.entity";
+import { Team } from "../../team/entities/team.entity";
+import { User } from "../../user/entities/user.entity";
 
 @Entity()
-export class Task extends BaseEntity implements taskInterface {
+export class Task extends BaseEntity implements TaskInterface {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
@@ -43,14 +45,15 @@ export class Task extends BaseEntity implements taskInterface {
   })
   toBeConfirmBy: string; //@TODO Add there ManyToOne Relation to User entity
 
-  @Column()
-  assignedTeam: string; //@TODO Add there ManyToMany Relation to UserTeam entity
+  @ManyToMany((type) => Team, (entity) => entity.assignedTask)
+  assignedTeam: Team[];
 
-  @Column()
-  assignedUser: string; //@TODO Add there ManyToMany Relation to User entity
+  @ManyToMany((type) => User, (entity) => entity.assignedTask)
+  assignedUser: User[]; //@TODO Add there ManyToMany Relation to User entity
 
-  @Column()
-  assignedTask: string; //@TODO Add there ManyToMany Relation to Task entity
+  @ManyToMany((type) => Task, (entity) => entity.assignedTask)
+  @JoinTable()
+  assignedTask: Task[];
 
   @Column()
   totalWorkTime: number;

@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post } from "@nestjs/common";
 import { TaskService } from "./task.service";
 import { CreateTaskDto } from "./dto/create.task.dto";
-import { createTaskResponse, findAndCountTaskResponse, findOneTaskResponse } from "../types";
+import { CreateTaskResponse, FindAndCountTaskResponse, FindOneTaskResponse } from "../types";
 import { FindAndCountTaskDto } from "./dto/find-and-count.task.dto";
 
 @Controller("task")
@@ -10,19 +10,19 @@ export class TaskController {
   }
 
   @Post("/")
-  create(@Body() createTaskDto: CreateTaskDto): Promise<createTaskResponse> {
+  create(@Body() createTaskDto: CreateTaskDto): Promise<CreateTaskResponse> {
     return this.taskService.create(createTaskDto);
   }
 
   @Get("/")
   findAndCount(
     @Body() findAndCountTaskDto: FindAndCountTaskDto
-  ): Promise<findAndCountTaskResponse> {
+  ): Promise<FindAndCountTaskResponse> {
     return this.taskService.findAndCount(findAndCountTaskDto);
   }
 
   @Get("/:id")
-  findOne(@Param("id") id: string): Promise<findOneTaskResponse> {
+  findOne(@Param("id") id: string): Promise<FindOneTaskResponse> {
     return this.taskService.findOne(id);
   }
 

@@ -1,7 +1,7 @@
 import { IsArray, IsNotEmpty, IsNumber, IsString } from "class-validator";
-import { findAndCountTaskRequest, TaskPriority, TaskStatus } from "../../types";
+import { FindAndCountTaskRequest, TaskPriority, TaskStatus } from "../../types";
 
-export class FindAndCountTaskDto implements findAndCountTaskRequest {
+export class FindAndCountTaskDto implements FindAndCountTaskRequest {
   @IsString()
   searchTerm: string;
 

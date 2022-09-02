@@ -1,6 +1,6 @@
-import { TaskPriority, TaskStatus, updateTaskRequest } from "../../types";
+import { TaskPriority, TaskStatus, UpdateTaskRequest } from "../../types";
 
-export class UpdateTaskDto implements updateTaskRequest {
+export class UpdateTaskDto implements UpdateTaskRequest {
   status: TaskStatus;
   priority: TaskPriority;
   assignedTeam: string[];

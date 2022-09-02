@@ -1,3 +1,7 @@
+import { Team } from "../../team/entities/team.entity";
+import { Task } from "../../task/entities/task.entity";
+import { User } from "../../user/entities/user.entity";
+
 export enum TaskStatus {
   Reported = "Reported",
   Open = "Open",
@@ -14,7 +18,7 @@ export enum TaskPriority {
   High = "High",
 }
 
-export interface taskInterface {
+export interface TaskInterface {
   id: string;
   name: string;
   description: string;
@@ -22,18 +26,20 @@ export interface taskInterface {
   priority: TaskPriority;
   createdBy: string;
   toBeConfirmBy: string;
-  assignedTeam: string;
-  assignedUser: string;
-  assignedTask: string;
+  assignedTeam: Team[];
+  assignedUser: User[];
+  assignedTask: Task[];
   totalWorkTime: number;
   createdAt: Date;
   changedAt: Date;
 }
 
-export interface createTaskRequest extends taskInterface {
+export interface CreateTaskRequest
+  extends Omit<TaskInterface,
+    "id" | "assignedTask" | "totalWorkTime" | "createdAt" | "changedAt"> {
 }
 
-export interface findAndCountTaskRequest {
+export interface FindAndCountTaskRequest {
   searchTerm: string;
   searchStatus: TaskStatus[];
   searchPriority: TaskPriority[];
@@ -43,23 +49,23 @@ export interface findAndCountTaskRequest {
   currentPage: number;
 }
 
-export interface updateTaskRequest
-  extends Pick<taskInterface, "status" | "priority" | "toBeConfirmBy"> {
+export interface UpdateTaskRequest
+  extends Pick<TaskInterface, "status" | "priority" | "toBeConfirmBy"> {
   assignedTeam: string[];
   assignedUser: string[];
   assignedTask: string[];
 }
 
-export interface createTaskResponse extends taskInterface {
+export interface CreateTaskResponse extends TaskInterface {
 }
 
-export type findAndCountTaskResponse = {
-  tasks: taskInterface[];
+export type FindAndCountTaskResponse = {
+  tasks: TaskInterface[];
   totalPages: number;
 };
 
-export interface findOneTaskResponse extends taskInterface {
+export interface FindOneTaskResponse extends TaskInterface {
 }
 
-export interface updateTaskResponse extends taskInterface {
+export interface UpdateTaskResponse extends TaskInterface {
 }

@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { CreateTaskDto } from "./dto/create.task.dto";
-import { createTaskResponse, findAndCountTaskResponse, findOneTaskResponse } from "../types";
+import { CreateTaskResponse, FindAndCountTaskResponse, FindOneTaskResponse } from "../types";
 import { Task } from "./entities/task.entity";
 import { assignProperties } from "../utils/accessory-functions";
 import { FindAndCountTaskDto } from "./dto/find-and-count.task.dto";
@@ -8,7 +8,7 @@ import { In, Like } from "typeorm";
 
 @Injectable()
 export class TaskService {
-  async create(createTaskDto: CreateTaskDto): Promise<createTaskResponse> {
+  async create(createTaskDto: CreateTaskDto): Promise<CreateTaskResponse> {
     const task = new Task();
     assignProperties(createTaskDto, task);
     await task.save();
@@ -17,14 +17,14 @@ export class TaskService {
 
   async findAndCount(
     findTaskDto: FindAndCountTaskDto
-  ): Promise<findAndCountTaskResponse> {
+  ): Promise<FindAndCountTaskResponse> {
     const [tasks, totalTasksCount] = await Task.findAndCount({
       where: {
         name: Like(`%${findTaskDto.searchTerm}%`),
         status: In(findTaskDto.searchStatus),
-        priority: In(findTaskDto.searchPriority),
-        assignedTeam: In(findTaskDto.searchAssignedTeam),
-        assignedUser: In(findTaskDto.searchAssignedUser)
+        priority: In(findTaskDto.searchPriority)
+        // assignedTeam: In(findTaskDto.searchAssignedTeam),
+        // assignedUser: In(findTaskDto.searchAssignedUser),
       },
       skip: findTaskDto.maxOnPage * (findTaskDto.currentPage - 1),
       take: findTaskDto.maxOnPage
@@ -37,7 +37,7 @@ export class TaskService {
     };
   }
 
-  async findOne(id: string): Promise<findOneTaskResponse> {
+  async findOne(id: string): Promise<FindOneTaskResponse> {
     return await Task.findOne({
       where: { id },
       relations: {
