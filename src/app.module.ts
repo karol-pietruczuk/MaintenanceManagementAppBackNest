@@ -8,7 +8,12 @@ import { TeamModule } from "./team/team.module";
 import { UserModule } from "./user/user.module";
 
 @Module({
-  imports: [TypeOrmModule.forRoot(dataSourceOptions), TaskModule, TeamModule, UserModule],
+  imports: [
+    TypeOrmModule.forRoot(dataSourceOptions),
+    TaskModule,
+    TeamModule,
+    UserModule
+  ],
   controllers: [AppController],
   providers: [AppService]
 })

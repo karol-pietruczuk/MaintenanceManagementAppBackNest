@@ -9,7 +9,8 @@ export class Team extends BaseEntity implements TeamInterface {
   id: string;
 
   @Column({
-    length: 50
+    length: 50,
+    unique: true
   })
   name: string;
 
@@ -21,7 +22,7 @@ export class Team extends BaseEntity implements TeamInterface {
 
   @ManyToMany((type) => User, (entity) => entity.assignedTeam)
   @JoinTable()
-  teamMembers: User[];
+  assignedUser: User[];
 
   @ManyToMany((type) => Task, (entity) => entity.assignedTeam)
   @JoinTable()

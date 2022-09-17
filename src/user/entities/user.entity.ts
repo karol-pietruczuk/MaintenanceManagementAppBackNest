@@ -31,7 +31,7 @@ export class User extends BaseEntity implements UserInterface {
   @Column()
   phoneNumber: number | null;
 
-  @ManyToMany((type) => Team, (entity) => entity.teamMembers)
+  @ManyToMany((type) => Team, (entity) => entity.assignedUser)
   assignedTeam: Team[];
 
   @ManyToMany((type) => Task, (entity) => entity.assignedUser)

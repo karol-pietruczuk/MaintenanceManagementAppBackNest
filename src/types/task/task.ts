@@ -36,15 +36,25 @@ export interface TaskInterface {
 
 export interface CreateTaskRequest
   extends Omit<TaskInterface,
-    "id" | "assignedTask" | "totalWorkTime" | "createdAt" | "changedAt"> {
+    | "id"
+    | "status"
+    | "assignedTask"
+    | "assignedTeam"
+    | "assignedUser"
+    | "totalWorkTime"
+    | "createdAt"
+    | "changedAt"> {
+  assignedTask: string[];
+  assignedTeam: string[];
+  assignedUser: string[];
 }
 
 export interface FindAndCountTaskRequest {
   searchTerm: string;
-  searchStatus: TaskStatus[];
-  searchPriority: TaskPriority[];
-  searchAssignedTeam: string[];
-  searchAssignedUser: string[];
+  searchStatus: TaskStatus[] | undefined;
+  searchPriority: TaskPriority[] | undefined;
+  searchAssignedTeamId: string[] | undefined;
+  searchAssignedUserId: string[] | undefined;
   maxOnPage: number;
   currentPage: number;
 }
@@ -62,10 +72,14 @@ export interface CreateTaskResponse extends TaskInterface {
 export type FindAndCountTaskResponse = {
   tasks: TaskInterface[];
   totalPages: number;
+  totalTasksCount: number;
 };
 
 export interface FindOneTaskResponse extends TaskInterface {
 }
 
 export interface UpdateTaskResponse extends TaskInterface {
+}
+
+export interface RemoveTaskResponse extends Pick<TaskInterface, "id"> {
 }

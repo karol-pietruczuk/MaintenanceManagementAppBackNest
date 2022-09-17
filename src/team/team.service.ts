@@ -1,6 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { CreateTeamDto } from "./dto/create-team.dto";
 import { UpdateTeamDto } from "./dto/update-team.dto";
+import { In } from "typeorm";
+import { Team } from "./entities/team.entity";
 
 @Injectable()
 export class TeamService {
@@ -22,5 +24,13 @@ export class TeamService {
 
   remove(id: number) {
     return `This action removes a #${id} team`;
+  }
+
+  async findMany(idArray: string[] | undefined | null): Promise<Team[]> {
+    return idArray
+      ? await Team.find({
+        where: { id: In(idArray) }
+      })
+      : null;
   }
 }

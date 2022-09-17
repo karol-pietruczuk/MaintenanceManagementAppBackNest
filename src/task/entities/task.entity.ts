@@ -38,12 +38,12 @@ export class Task extends BaseEntity implements TaskInterface {
   @Column({
     nullable: false
   })
-  createdBy: string; //@TODO Add there ManyToOne Relation to User entity
+  createdBy: string; //@TODO Add there ManyToOne Relation to User entity and change entity to "creatorUserId"
 
   @Column({
-    nullable: false
+    nullable: true
   })
-  toBeConfirmBy: string; //@TODO Add there ManyToOne Relation to User entity
+  toBeConfirmBy: string; //@TODO Add there ManyToOne Relation to User entity and change entity to "confirmUserId"
 
   @ManyToMany((type) => Team, (entity) => entity.assignedTask)
   assignedTeam: Team[];
@@ -72,4 +72,7 @@ export class Task extends BaseEntity implements TaskInterface {
 
   @OneToMany((type) => TaskComment, (entity) => entity.task)
   comments: TaskComment[];
+
+  // @TODO Add there a field with relation ManyToMany with User to know user is working or not and know working time.
+  // // Or maybe another entity/table.
 }

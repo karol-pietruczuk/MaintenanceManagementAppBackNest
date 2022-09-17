@@ -14,6 +14,6 @@ export interface TeamInterface {
   name: string;
   phoneNumber: number | null;
   teamPrivileges: TeamPrivileges;
-  teamMembers: User[];
+  assignedUser: User[];
   assignedTask: Task[];
 }

@@ -1,37 +1,31 @@
-import { CreateTaskRequest, TaskPriority, TaskStatus } from "../../types";
-import { IsNotEmpty, IsString } from "class-validator";
-import { Team } from "../../team/entities/team.entity";
-import { User } from "../../user/entities/user.entity";
-import { Task } from "../entities/task.entity";
+import { CreateTaskRequest, TaskPriority } from "../../types";
+import { IsArray, IsNotEmpty, IsString } from "class-validator";
 
 export class CreateTaskDto implements CreateTaskRequest {
   @IsNotEmpty()
   @IsString()
-  public name: string;
+  name: string;
 
   @IsString()
-  public description: string;
-
-  @IsString()
-  status: TaskStatus;
+  description: string;
 
   @IsNotEmpty()
   @IsString()
-  public priority: TaskPriority;
+  priority: TaskPriority;
 
   @IsNotEmpty()
   @IsString()
-  public createdBy: string;
+  createdBy: string;
 
   @IsString()
-  public toBeConfirmBy: string;
+  toBeConfirmBy: string;
 
-  @IsString()
-  public assignedTeam: Team[];
+  @IsArray()
+  assignedTeam: string[];
 
-  @IsString()
-  public assignedUser: User[];
+  @IsArray()
+  assignedUser: string[];
 
-  @IsString()
-  public assignedTask: Task[];
+  @IsArray()
+  assignedTask: string[];
 }
