@@ -15,11 +15,13 @@ import { ILike, In } from "typeorm";
 import { UserService } from "../user/user.service";
 import { TeamService } from "../team/team.service";
 import { UpdateTaskDto } from "./dto/update.task.dto";
+import { TaskCommentService } from "../task-comment/task-comment.service";
 
 @Injectable()
 export class TaskService {
   @Inject() userService: UserService;
   @Inject() teamService: TeamService;
+  @Inject() taskCommentService: TaskCommentService;
 
   async create(createTaskDto: CreateTaskDto): Promise<CreateTaskResponse> {
     const task = new Task();
@@ -31,6 +33,11 @@ export class TaskService {
       createTaskDto.assignedUser
     );
     task.assignedTask = await this.findMany(createTaskDto.assignedTask);
+    const creator = (
+      await this.userService.findMany([createTaskDto.createdBy])
+    )[0];
+    task.createdBy = creator;
+    task.toBeConfirmBy = creator;
     task.status = TaskStatus.Reported;
     await task.save();
     return task;
@@ -43,7 +50,8 @@ export class TaskService {
       relations: {
         assignedTeam: true,
         assignedUser: true,
-        assignedTask: true
+        assignedTask: true,
+        createdBy: true
       },
       where: [
         {
@@ -86,10 +94,21 @@ export class TaskService {
     const task = await Task.findOne({
       where: { id },
       relations: {
-        comments: true
+        comments: true,
+        assignedTeam: true,
+        assignedUser: true,
+        assignedTask: true,
+        createdBy: true,
+        toBeConfirmBy: true
       }
     });
     if (!task) throw new NotFoundException();
+
+    task.comments = await Promise.all(
+      task.comments.map(async (comment) => {
+        return this.taskCommentService.findOne(comment.id);
+      })
+    );
     return task;
   }
 
@@ -103,7 +122,9 @@ export class TaskService {
         comments: true,
         assignedTeam: true,
         assignedUser: true,
-        assignedTask: true
+        assignedTask: true,
+        createdBy: true,
+        toBeConfirmBy: true
       }
     });
     assignProperties(updateTaskDto, task);
@@ -117,6 +138,11 @@ export class TaskService {
       );
     if (updateTaskDto.assignedTask)
       task.assignedTask = await this.findMany(updateTaskDto.assignedTask);
+    if (updateTaskDto.toBeConfirmBy)
+      task.toBeConfirmBy = (
+        await this.userService.findMany([updateTaskDto.toBeConfirmBy])
+      )[0];
+
     await task.save();
     return task;
   }
@@ -128,7 +154,9 @@ export class TaskService {
         assignedTeam: true,
         assignedUser: true,
         assignedTask: true,
-        comments: true
+        comments: true,
+        createdBy: true,
+        toBeConfirmBy: true
       }
     });
     if (!task) throw new NotFoundException();
@@ -136,6 +164,8 @@ export class TaskService {
     task.assignedUser = null;
     task.assignedTask = null;
     task.comments = null;
+    task.createdBy = null;
+    task.toBeConfirmBy = null;
     await task.save();
     await task.remove();
     return { id };

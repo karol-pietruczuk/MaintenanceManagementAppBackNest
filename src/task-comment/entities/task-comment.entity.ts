@@ -1,8 +1,10 @@
 import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Task } from "./task.entity";
+import { Task } from "../../task/entities/task.entity";
+import { TaskCommentInterface } from "../../types/task-comment/task-comment";
+import { User } from "../../user/entities/user.entity";
 
 @Entity()
-export class TaskComment extends BaseEntity {
+export class TaskComment extends BaseEntity implements TaskCommentInterface {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
@@ -11,16 +13,14 @@ export class TaskComment extends BaseEntity {
   })
   description: string;
 
-  @Column({
-    nullable: false
-  })
-  createdBy: string; //@TODO Add there ManyToOne Relation to User entity
+  @ManyToOne((type) => User, (entity) => entity.createdTaskComment)
+  createdBy: User;
 
   @Column({
     default: false,
     nullable: false
   })
-  public: boolean;
+  publicVisibility: boolean;
 
   @ManyToOne((type) => Task, (entity) => entity.comments)
   task: Task;

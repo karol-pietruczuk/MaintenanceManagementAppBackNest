@@ -7,12 +7,12 @@ export class FindAndCountTaskDto implements FindAndCountTaskRequest {
 
   @IsOptional()
   @IsArray() // @TODO Add your own validate decorator to validate if Array is Type TaskStatus[]. See on npm site
-             // class-validator.
+    // class-validator.
   searchStatus: TaskStatus[] | undefined;
 
   @IsOptional()
   @IsArray() // @TODO Add your own validate decorator to validate if Array is Type TaskPriority[]. See on npm site
-             // class-validator.
+    // class-validator.
   searchPriority: TaskPriority[] | undefined;
 
   @IsOptional()

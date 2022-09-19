@@ -24,8 +24,8 @@ export interface TaskInterface {
   description: string;
   status: TaskStatus;
   priority: TaskPriority;
-  createdBy: string;
-  toBeConfirmBy: string;
+  createdBy: User;
+  toBeConfirmBy: User;
   assignedTeam: Team[];
   assignedUser: User[];
   assignedTask: Task[];
@@ -43,10 +43,14 @@ export interface CreateTaskRequest
     | "assignedUser"
     | "totalWorkTime"
     | "createdAt"
-    | "changedAt"> {
+    | "changedAt"
+    | "createdBy"
+    | "toBeConfirmBy"> {
   assignedTask: string[];
   assignedTeam: string[];
   assignedUser: string[];
+  createdBy: string;
+  toBeConfirmBy: string;
 }
 
 export interface FindAndCountTaskRequest {
@@ -60,10 +64,11 @@ export interface FindAndCountTaskRequest {
 }
 
 export interface UpdateTaskRequest
-  extends Pick<TaskInterface, "status" | "priority" | "toBeConfirmBy"> {
+  extends Pick<TaskInterface, "status" | "priority"> {
   assignedTeam: string[];
   assignedUser: string[];
   assignedTask: string[];
+  toBeConfirmBy: string;
 }
 
 export interface CreateTaskResponse extends TaskInterface {

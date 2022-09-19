@@ -24,7 +24,5 @@ export class UpdateTaskDto implements UpdateTaskRequest {
 
   @IsOptional()
   @IsString()
-  toBeConfirmBy: string; //@TODO Add there ManyToOne relation to User
-
-  //@TODO Add there updating totalWorkTime and user start/stop work
+  toBeConfirmBy: string;
 }
