@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { In } from "typeorm";
@@ -32,5 +32,12 @@ export class UserService {
         where: { id: In(idArray) }
       })
       : null;
+  }
+
+  async findOneBlank(id: string): Promise<User> {
+    const user = await User.findOneBy({ id });
+    if (!user) throw new NotFoundException();
+
+    return user;
   }
 }

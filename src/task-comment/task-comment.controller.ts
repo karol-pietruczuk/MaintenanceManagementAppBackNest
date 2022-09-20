@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Param, Patch, Post } from "@nestjs/common";
 import { TaskCommentService } from "./task-comment.service";
 import { CreateTaskCommentDto } from "./dto/create-task-comment.dto";
 import { UpdateTaskCommentDto } from "./dto/update-task-comment.dto";
+import { CreateTaskCommentResponse, RemoveTaskCommentResponse, UpdateTaskCommentResponse } from "../types/task-comment";
 
 @Controller("task-comment")
 export class TaskCommentController {
@@ -9,20 +10,22 @@ export class TaskCommentController {
   }
 
   @Post()
-  create(@Body() createTaskCommentDto: CreateTaskCommentDto) {
+  create(
+    @Body() createTaskCommentDto: CreateTaskCommentDto
+  ): Promise<CreateTaskCommentResponse> {
     return this.taskCommentService.create(createTaskCommentDto);
   }
 
   @Patch(":id")
   update(
-    @Param("id") id: string,
+    @Param("id") commentId: string,
     @Body() updateTaskCommentDto: UpdateTaskCommentDto
-  ) {
-    return this.taskCommentService.update(+id, updateTaskCommentDto);
+  ): Promise<UpdateTaskCommentResponse> {
+    return this.taskCommentService.update(commentId, updateTaskCommentDto);
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.taskCommentService.remove(+id);
+  remove(@Param("id") id: string): Promise<RemoveTaskCommentResponse> {
+    return this.taskCommentService.remove(id);
   }
 }

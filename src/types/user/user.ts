@@ -25,3 +25,6 @@ export interface UserInterface {
   taskToBeConfirm: Task[];
   createdTaskComment: TaskComment[];
 }
+
+export interface FindOneUserResponse extends UserInterface {
+}

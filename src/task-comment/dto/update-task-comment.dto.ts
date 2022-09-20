@@ -1,5 +1,12 @@
-import { PartialType } from "@nestjs/mapped-types";
-import { CreateTaskCommentDto } from "./create-task-comment.dto";
+import { UpdateTaskCommentRequest } from "../../types/task-comment";
+import { IsBoolean, IsOptional, IsString } from "class-validator";
 
-export class UpdateTaskCommentDto extends PartialType(CreateTaskCommentDto) {
+export class UpdateTaskCommentDto implements UpdateTaskCommentRequest {
+  @IsString()
+  @IsOptional()
+  description: string;
+
+  @IsBoolean()
+  @IsOptional()
+  publicVisibility: boolean;
 }

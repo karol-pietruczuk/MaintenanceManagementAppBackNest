@@ -9,3 +9,23 @@ export interface TaskCommentInterface {
   task: Task;
   createdAt: Date;
 }
+
+export interface CreateTaskCommentRequest
+  extends Pick<TaskCommentInterface, "description" | "publicVisibility"> {
+  createdBy: string;
+  taskId: string;
+}
+
+export interface UpdateTaskCommentRequest
+  extends Pick<TaskCommentInterface, "description" | "publicVisibility"> {
+}
+
+export interface CreateTaskCommentResponse extends TaskCommentInterface {
+}
+
+export interface UpdateTaskCommentResponse extends TaskCommentInterface {
+}
+
+export interface RemoveTaskCommentResponse
+  extends Pick<TaskCommentInterface, "id"> {
+}

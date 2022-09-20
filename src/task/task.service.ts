@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateTaskDto } from "./dto/create.task.dto";
 import {
   CreateTaskResponse,
@@ -19,9 +19,13 @@ import { TaskCommentService } from "../task-comment/task-comment.service";
 
 @Injectable()
 export class TaskService {
-  @Inject() userService: UserService;
-  @Inject() teamService: TeamService;
-  @Inject() taskCommentService: TaskCommentService;
+  constructor(
+    @Inject(forwardRef(() => TaskCommentService))
+    private taskCommentService: TaskCommentService,
+    @Inject(forwardRef(() => UserService)) private userService: UserService,
+    @Inject(forwardRef(() => TeamService)) private teamService: TeamService
+  ) {
+  }
 
   async create(createTaskDto: CreateTaskDto): Promise<CreateTaskResponse> {
     const task = new Task();
@@ -33,9 +37,9 @@ export class TaskService {
       createTaskDto.assignedUser
     );
     task.assignedTask = await this.findMany(createTaskDto.assignedTask);
-    const creator = (
-      await this.userService.findMany([createTaskDto.createdBy])
-    )[0];
+    const creator = await this.userService.findOneBlank(
+      createTaskDto.createdBy
+    );
     task.createdBy = creator;
     task.toBeConfirmBy = creator;
     task.status = TaskStatus.Reported;
@@ -104,10 +108,13 @@ export class TaskService {
     });
     if (!task) throw new NotFoundException();
 
-    task.comments = await Promise.all(
-      task.comments.map(async (comment) => {
-        return this.taskCommentService.findOne(comment.id);
-      })
+    // task.comments = await Promise.all(
+    //   task.comments.map(async (comment) => {
+    //     return this.taskCommentService.findOne(comment.id);
+    //   }),
+    // );
+    task.comments = await this.taskCommentService.findMany(
+      task.comments.map((comment) => comment.id)
     );
     return task;
   }
@@ -177,5 +184,12 @@ export class TaskService {
         where: { id: In(idArray) }
       })
       : null;
+  }
+
+  async findOneBlank(id: string): Promise<Task> {
+    const task = await Task.findOneBy({ id });
+    if (!task) throw new NotFoundException();
+
+    return task;
   }
 }

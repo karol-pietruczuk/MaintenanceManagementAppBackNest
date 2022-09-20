@@ -1,6 +1,7 @@
 import { Team } from "../../team/entities/team.entity";
 import { Task } from "../../task/entities/task.entity";
 import { User } from "../../user/entities/user.entity";
+import { TaskComment } from "../../task-comment/entities/task-comment.entity";
 
 export enum TaskStatus {
   Reported = "Reported",
@@ -32,6 +33,7 @@ export interface TaskInterface {
   totalWorkTime: number;
   createdAt: Date;
   changedAt: Date;
+  comments: TaskComment[];
 }
 
 export interface CreateTaskRequest
@@ -45,7 +47,8 @@ export interface CreateTaskRequest
     | "createdAt"
     | "changedAt"
     | "createdBy"
-    | "toBeConfirmBy"> {
+    | "toBeConfirmBy"
+    | "comments"> {
   assignedTask: string[];
   assignedTeam: string[];
   assignedUser: string[];

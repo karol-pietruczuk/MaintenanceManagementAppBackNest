@@ -1,30 +1,81 @@
-import { Injectable } from "@nestjs/common";
+import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateTaskCommentDto } from "./dto/create-task-comment.dto";
 import { UpdateTaskCommentDto } from "./dto/update-task-comment.dto";
 import { TaskComment } from "./entities/task-comment.entity";
+import { CreateTaskCommentResponse, RemoveTaskCommentResponse, UpdateTaskCommentResponse } from "../types/task-comment";
+import { TaskService } from "../task/task.service";
+import { UserService } from "../user/user.service";
+import { In } from "typeorm";
+import { assignProperties } from "../utils/accessory-functions";
 
 @Injectable()
 export class TaskCommentService {
-  create(createTaskCommentDto: CreateTaskCommentDto) {
-    return "This action adds a new taskComment";
+  constructor(
+    @Inject(forwardRef(() => TaskService)) private taskService: TaskService,
+    @Inject(forwardRef(() => UserService)) private userService: UserService
+  ) {
   }
 
-  findAll() {
-    return `This action returns all taskComment`;
+  async create(
+    createTaskCommentDto: CreateTaskCommentDto
+  ): Promise<CreateTaskCommentResponse> {
+    const task = await this.taskService.findOneBlank(
+      createTaskCommentDto.taskId
+    );
+    const user = await this.userService.findOneBlank(
+      createTaskCommentDto.createdBy
+    );
+    const taskComment = new TaskComment();
+    assignProperties(createTaskCommentDto, taskComment);
+    taskComment.task = task;
+    taskComment.createdBy = user;
+    await taskComment.save();
+
+    return taskComment;
+  }
+
+  async update(
+    id: string,
+    updateTaskCommentDto: UpdateTaskCommentDto
+  ): Promise<UpdateTaskCommentResponse> {
+    const taskComment = await this.findOne(id);
+    if (!!updateTaskCommentDto.description)
+      taskComment.description = updateTaskCommentDto.description;
+    if (updateTaskCommentDto.hasOwnProperty("publicVisibility"))
+      taskComment.publicVisibility = updateTaskCommentDto.publicVisibility;
+    await taskComment.save();
+
+    return taskComment;
+  }
+
+  async remove(id: string): Promise<RemoveTaskCommentResponse> {
+    const taskComment = await this.findOne(id);
+    taskComment.task = null;
+    taskComment.createdBy = null;
+    await taskComment.save();
+    await taskComment.remove();
+    return { id };
+  }
+
+  async findAllForTask(taskId: string): Promise<TaskComment[]> {
+    const task = await this.taskService.findOne(taskId);
+    return await this.findMany(task.comments.map((comment) => comment.id));
+  }
+
+  async findMany(idArray: string[] | undefined | null): Promise<TaskComment[]> {
+    return idArray
+      ? await TaskComment.find({
+        where: { id: In(idArray) }
+      })
+      : null;
   }
 
   async findOne(id: string) {
-    return await TaskComment.findOne({
+    const taskComment = await TaskComment.findOne({
       where: { id },
-      relations: { createdBy: true }
+      relations: { createdBy: true, task: true }
     });
-  }
-
-  update(id: number, updateTaskCommentDto: UpdateTaskCommentDto) {
-    return `This action updates a #${id} taskComment`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} taskComment`;
+    if (!taskComment) throw new NotFoundException();
+    return taskComment;
   }
 }
