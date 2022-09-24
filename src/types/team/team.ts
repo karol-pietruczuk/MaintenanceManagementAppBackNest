@@ -12,8 +12,34 @@ export enum TeamPrivileges {
 export interface TeamInterface {
   id: string;
   name: string;
-  phoneNumber: number | null;
+  phoneNumber: string;
   teamPrivileges: TeamPrivileges;
   assignedUser: User[];
   assignedTask: Task[];
+}
+
+export interface CreateTeamRequest
+  extends Omit<TeamInterface, "id" | "assignedUser" | "assignedTask"> {
+  assignedUser: string[];
+  assignedTask: string[];
+}
+
+export interface UpdateTeamRequest
+  extends Omit<TeamInterface, "id" | "assignedUser" | "assignedTask"> {
+  assignedUser: string[];
+  assignedTask: string[];
+}
+
+export interface CreateTeamResponse extends TeamInterface {
+}
+
+export type FindAllTeamResponse = TeamInterface[];
+
+export interface FindOneTeamResponse extends TeamInterface {
+}
+
+export interface UpdateTeamResponse extends TeamInterface {
+}
+
+export interface RemoveTeamResponse extends Pick<TeamInterface, "id"> {
 }

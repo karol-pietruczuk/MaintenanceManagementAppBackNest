@@ -6,7 +6,11 @@ import { TeamModule } from "../team/team.module";
 import { TaskCommentModule } from "../task-comment/task-comment.module";
 
 @Module({
-  imports: [forwardRef(() => TaskCommentModule), UserModule, TeamModule],
+  imports: [
+    forwardRef(() => TaskCommentModule),
+    forwardRef(() => UserModule),
+    forwardRef(() => TeamModule)
+  ],
   controllers: [TaskController],
   providers: [TaskService],
   exports: [TaskService]

@@ -14,8 +14,10 @@ export class Team extends BaseEntity implements TeamInterface {
   })
   name: string;
 
-  @Column() // @TODO How to validate phone number? Which type for phoneNumber is the best?
-  phoneNumber: number | null;
+  @Column({
+    nullable: true
+  })
+  phoneNumber: string;
 
   @Column()
   teamPrivileges: TeamPrivileges;

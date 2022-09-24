@@ -1,29 +1,73 @@
-import { Injectable } from "@nestjs/common";
+import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateTeamDto } from "./dto/create-team.dto";
 import { UpdateTeamDto } from "./dto/update-team.dto";
 import { In } from "typeorm";
 import { Team } from "./entities/team.entity";
+import { CreateTeamResponse, FindAllTeamResponse, RemoveTeamResponse, UpdateTeamResponse } from "../types/team";
+import { assignProperties } from "../utils/accessory-functions";
+import { UserService } from "../user/user.service";
+import { TaskService } from "../task/task.service";
 
 @Injectable()
 export class TeamService {
-  create(createTeamDto: CreateTeamDto) {
-    return "This action adds a new team";
+  constructor(
+    @Inject(forwardRef(() => TaskService)) private taskService: TaskService,
+    @Inject(forwardRef(() => UserService)) private userService: UserService
+  ) {
   }
 
-  findAll() {
-    return `This action returns all team`;
+  async create(createTeamDto: CreateTeamDto): Promise<CreateTeamResponse> {
+    const team = new Team();
+    assignProperties(createTeamDto, team);
+    team.assignedTask = await this.taskService.findMany(
+      createTeamDto.assignedTask
+    );
+    team.assignedUser = await this.userService.findMany(
+      createTeamDto.assignedUser
+    );
+    await team.save();
+    return team;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} team`;
+  async findAll(): Promise<FindAllTeamResponse> {
+    return await Team.find();
   }
 
-  update(id: number, updateTeamDto: UpdateTeamDto) {
-    return `This action updates a #${id} team`;
+  async findOne(id: string): Promise<Team> {
+    const team = await Team.findOne({
+      where: { id },
+      relations: { assignedUser: true, assignedTask: true }
+    });
+    if (!team) throw new NotFoundException();
+    return team;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} team`;
+  async update(
+    id: string,
+    updateTeamDto: UpdateTeamDto
+  ): Promise<UpdateTeamResponse> {
+    const team = await this.findOne(id);
+    assignProperties(updateTeamDto, team);
+    if (updateTeamDto.assignedTask)
+      team.assignedTask = await this.taskService.findMany(
+        updateTeamDto.assignedTask
+      );
+    if (updateTeamDto.assignedUser)
+      team.assignedUser = await this.userService.findMany(
+        updateTeamDto.assignedUser
+      );
+    await team.save();
+    return team;
+  }
+
+  async remove(id: string): Promise<RemoveTeamResponse> {
+    const team = await this.findOne(id);
+    team.assignedTask = null;
+    team.assignedUser = null;
+    await team.save();
+    return {
+      id
+    };
   }
 
   async findMany(idArray: string[] | undefined | null): Promise<Team[]> {

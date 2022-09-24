@@ -2,6 +2,13 @@ import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/commo
 import { TeamService } from "./team.service";
 import { CreateTeamDto } from "./dto/create-team.dto";
 import { UpdateTeamDto } from "./dto/update-team.dto";
+import {
+  CreateTeamResponse,
+  FindAllTeamResponse,
+  FindOneTeamResponse,
+  RemoveTeamResponse,
+  UpdateTeamResponse
+} from "../types/team";
 
 @Controller("team")
 export class TeamController {
@@ -9,27 +16,30 @@ export class TeamController {
   }
 
   @Post()
-  create(@Body() createTeamDto: CreateTeamDto) {
+  create(@Body() createTeamDto: CreateTeamDto): Promise<CreateTeamResponse> {
     return this.teamService.create(createTeamDto);
   }
 
   @Get()
-  findAll() {
+  findAll(): Promise<FindAllTeamResponse> {
     return this.teamService.findAll();
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.teamService.findOne(+id);
+  findOne(@Param("id") id: string): Promise<FindOneTeamResponse> {
+    return this.teamService.findOne(id);
   }
 
   @Patch(":id")
-  update(@Param("id") id: string, @Body() updateTeamDto: UpdateTeamDto) {
-    return this.teamService.update(+id, updateTeamDto);
+  update(
+    @Param("id") id: string,
+    @Body() updateTeamDto: UpdateTeamDto
+  ): Promise<UpdateTeamResponse> {
+    return this.teamService.update(id, updateTeamDto);
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.teamService.remove(+id);
+  remove(@Param("id") id: string): Promise<RemoveTeamResponse> {
+    return this.teamService.remove(id);
   }
 }

@@ -1,5 +1,24 @@
-import { PartialType } from "@nestjs/mapped-types";
-import { CreateTeamDto } from "./create-team.dto";
+import { TeamPrivileges, UpdateTeamRequest } from "../../types/team";
+import { IsOptional, IsPhoneNumber, IsString } from "class-validator";
 
-export class UpdateTeamDto extends PartialType(CreateTeamDto) {
+export class UpdateTeamDto implements UpdateTeamRequest {
+  @IsOptional()
+  @IsString({ each: true })
+  assignedTask: string[];
+
+  @IsOptional()
+  @IsString({ each: true })
+  assignedUser: string[];
+
+  @IsOptional()
+  @IsString()
+  name: string;
+
+  @IsOptional()
+  @IsPhoneNumber("PL")
+  phoneNumber: string;
+
+  @IsOptional()
+  @IsString()
+  teamPrivileges: TeamPrivileges;
 }
