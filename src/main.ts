@@ -1,6 +1,6 @@
-import { NestFactory } from "@nestjs/core";
-import { AppModule } from "./app.module";
-import { ValidationPipe } from "@nestjs/common";
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,9 +12,13 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
       transform: true,
       transformOptions: {
-        enableImplicitConversion: true
-      }
-    })
+        enableImplicitConversion: true,
+      },
+      exceptionFactory: (errors) => {
+        console.log(errors);
+        return new BadRequestException(errors[0].constraints);
+      },
+    }),
   );
 
   await app.listen(3001);
