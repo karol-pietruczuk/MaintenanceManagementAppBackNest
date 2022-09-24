@@ -12,7 +12,7 @@ export enum TeamPrivileges {
 export interface TeamInterface {
   id: string;
   name: string;
-  phoneNumber: string;
+  phoneNumber: string | null;
   teamPrivileges: TeamPrivileges;
   assignedUser: User[];
   assignedTask: Task[];

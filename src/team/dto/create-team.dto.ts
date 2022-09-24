@@ -8,7 +8,7 @@ export class CreateTeamDto implements CreateTeamRequest {
 
   @IsOptional()
   @IsPhoneNumber("PL")
-  phoneNumber: string;
+  phoneNumber: string | null;
 
   @IsNotEmpty()
   @IsString()

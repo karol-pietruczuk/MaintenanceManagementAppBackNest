@@ -15,11 +15,17 @@ export class Team extends BaseEntity implements TeamInterface {
   name: string;
 
   @Column({
-    nullable: true
+    nullable: true,
+    length: 12
   })
-  phoneNumber: string;
+  phoneNumber: string | null;
 
-  @Column()
+  @Column({
+    type: "enum",
+    enum: TeamPrivileges,
+    default: TeamPrivileges.Production,
+    nullable: false
+  })
   teamPrivileges: TeamPrivileges;
 
   @ManyToMany((type) => User, (entity) => entity.assignedTeam)

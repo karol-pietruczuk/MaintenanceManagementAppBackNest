@@ -16,7 +16,7 @@ export class UpdateTeamDto implements UpdateTeamRequest {
 
   @IsOptional()
   @IsPhoneNumber("PL")
-  phoneNumber: string;
+  phoneNumber: string | null;
 
   @IsOptional()
   @IsString()

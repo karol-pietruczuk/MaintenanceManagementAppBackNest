@@ -16,7 +16,7 @@ export interface UserInterface {
   name: string;
   surname: string;
   pwdHash: string;
-  phoneNumber: number | null;
+  phoneNumber: string | null;
   role: UserRole;
   currentToken: string;
   assignedTeam: Team[];
@@ -26,5 +26,35 @@ export interface UserInterface {
   createdTaskComment: TaskComment[];
 }
 
-export interface FindOneUserResponse extends UserInterface {
+export interface CreateUserRequest
+  extends Omit<UserInterface,
+    | "id"
+    | "pwdHash"
+    | "currentToken"
+    | "assignedTeam"
+    | "assignedTask"
+    | "createdTask"
+    | "taskToBeConfirm"
+    | "createdTaskComment"> {
+  pwd: string;
+  assignedTeam: string[];
 }
+
+export interface CreateUserResponse
+  extends Omit<UserInterface,
+    | "pwdHash"
+    | "currentToken"
+    | "assignedTask"
+    | "createdTask"
+    | "taskToBeConfirm"
+    | "createdTaskComment"> {
+}
+
+export type FindAllUserResponse = Omit<UserInterface,
+  | "pwdHash"
+  | "currentToken"
+  | "assignedTask"
+  | "createdTask"
+  | "taskToBeConfirm"
+  | "createdTaskComment"
+  | "phoneNumber">[];

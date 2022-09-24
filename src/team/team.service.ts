@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { ConflictException, forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateTeamDto } from "./dto/create-team.dto";
 import { UpdateTeamDto } from "./dto/update-team.dto";
 import { In } from "typeorm";
@@ -17,6 +17,12 @@ export class TeamService {
   }
 
   async create(createTeamDto: CreateTeamDto): Promise<CreateTeamResponse> {
+    if (await Team.findOneBy({ name: createTeamDto.name }))
+      throw new ConflictException({
+        message: {
+          name: "team with given name already exists"
+        }
+      });
     const team = new Team();
     assignProperties(createTeamDto, team);
     team.assignedTask = await this.taskService.findMany(
@@ -47,6 +53,18 @@ export class TeamService {
     updateTeamDto: UpdateTeamDto
   ): Promise<UpdateTeamResponse> {
     const team = await this.findOne(id);
+
+    if (
+      updateTeamDto.name &&
+      team.name !== updateTeamDto.name &&
+      (await Team.findOneBy({ name: updateTeamDto.name }))
+    )
+      throw new ConflictException({
+        message: {
+          name: "team with given name already exists"
+        }
+      });
+
     assignProperties(updateTeamDto, team);
     if (updateTeamDto.assignedTask)
       team.assignedTask = await this.taskService.findMany(

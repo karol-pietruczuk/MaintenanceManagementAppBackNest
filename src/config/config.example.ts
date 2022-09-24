@@ -13,3 +13,7 @@
 //   logging: true,
 //   migrations: ['dist/migration/**{.ts,.js}'],
 // }
+// export const hashStrategy = {
+//   algorithm: '',
+//   salt: '',
+// };

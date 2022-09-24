@@ -10,29 +10,42 @@ export class User extends BaseEntity implements UserInterface {
   id: string;
 
   @Column({
-    length: 255
+    length: 255,
+    unique: true,
+    nullable: false
   })
   email: string;
 
   @Column({
-    length: 50
+    length: 50,
+    nullable: false
   })
   name: string;
 
   @Column({
-    length: 100
+    length: 100,
+    nullable: false
   })
   surname: string;
 
   @Column({
-    length: 255
+    length: 255,
+    nullable: false
   })
   pwdHash: string;
 
-  @Column()
-  phoneNumber: number | null;
+  @Column({
+    nullable: true,
+    length: 12
+  })
+  phoneNumber: string | null;
 
-  @Column()
+  @Column({
+    type: "enum",
+    enum: UserRole,
+    nullable: false,
+    default: UserRole.Production
+  })
   role: UserRole;
 
   @ManyToMany((type) => Team, (entity) => entity.assignedUser)
@@ -42,7 +55,9 @@ export class User extends BaseEntity implements UserInterface {
   @JoinTable()
   assignedTask: Task[];
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   currentToken: string;
 
   @OneToMany((type) => Task, (entity) => entity.createdBy)
