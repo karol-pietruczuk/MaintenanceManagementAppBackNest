@@ -1,5 +1,5 @@
 import { CreateTaskRequest, TaskPriority } from "../../types";
-import { IsArray, IsNotEmpty, IsString } from "class-validator";
+import { IsArray, IsEnum, IsNotEmpty, IsString } from "class-validator";
 
 export class CreateTaskDto implements CreateTaskRequest {
   @IsNotEmpty()
@@ -10,7 +10,7 @@ export class CreateTaskDto implements CreateTaskRequest {
   description: string;
 
   @IsNotEmpty()
-  @IsString()
+  @IsEnum(TaskPriority)
   priority: TaskPriority;
 
   @IsNotEmpty()

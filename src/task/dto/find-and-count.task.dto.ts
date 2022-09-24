@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
+import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
 import { FindAndCountTaskRequest, TaskPriority, TaskStatus } from "../../types";
 
 export class FindAndCountTaskDto implements FindAndCountTaskRequest {
@@ -6,13 +6,11 @@ export class FindAndCountTaskDto implements FindAndCountTaskRequest {
   searchTerm: string;
 
   @IsOptional()
-  @IsArray() // @TODO Add your own validate decorator to validate if Array is Type TaskStatus[]. See on npm site
-    // class-validator.
+  @IsEnum(TaskStatus, { each: true })
   searchStatus: TaskStatus[] | undefined;
 
   @IsOptional()
-  @IsArray() // @TODO Add your own validate decorator to validate if Array is Type TaskPriority[]. See on npm site
-    // class-validator.
+  @IsEnum(TaskPriority, { each: true })
   searchPriority: TaskPriority[] | undefined;
 
   @IsOptional()

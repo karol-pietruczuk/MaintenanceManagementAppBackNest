@@ -57,11 +57,6 @@ export class TaskCommentService {
     return { id };
   }
 
-  async findAllForTask(taskId: string): Promise<TaskComment[]> {
-    const task = await this.taskService.findOne(taskId);
-    return await this.findMany(task.comments.map((comment) => comment.id));
-  }
-
   async findMany(idArray: string[] | undefined | null): Promise<TaskComment[]> {
     return idArray
       ? await TaskComment.find({
@@ -75,7 +70,12 @@ export class TaskCommentService {
       where: { id },
       relations: { createdBy: true, task: true }
     });
-    if (!taskComment) throw new NotFoundException();
+    if (!taskComment)
+      throw new NotFoundException({
+        message: {
+          taskComment: "taskComment not found"
+        }
+      });
     return taskComment;
   }
 }

@@ -36,7 +36,9 @@ export class TeamService {
   }
 
   async findAll(): Promise<FindAllTeamResponse> {
-    return await Team.find();
+    return await Team.find({
+      relations: { assignedUser: true }
+    });
   }
 
   async findOne(id: string): Promise<Team> {
@@ -44,7 +46,12 @@ export class TeamService {
       where: { id },
       relations: { assignedUser: true, assignedTask: true }
     });
-    if (!team) throw new NotFoundException();
+    if (!team)
+      throw new NotFoundException({
+        message: {
+          team: "team not found"
+        }
+      });
     return team;
   }
 
@@ -83,6 +90,7 @@ export class TeamService {
     team.assignedTask = null;
     team.assignedUser = null;
     await team.save();
+    await team.remove();
     return {
       id
     };

@@ -106,7 +106,12 @@ export class TaskService {
         toBeConfirmBy: true
       }
     });
-    if (!task) throw new NotFoundException();
+    if (!task)
+      throw new NotFoundException({
+        message: {
+          task: "task not found"
+        }
+      });
 
     // task.comments = await Promise.all(
     //   task.comments.map(async (comment) => {
@@ -166,7 +171,12 @@ export class TaskService {
         toBeConfirmBy: true
       }
     });
-    if (!task) throw new NotFoundException();
+    if (!task)
+      throw new NotFoundException({
+        message: {
+          task: "task not found"
+        }
+      });
     task.assignedTeam = null;
     task.assignedUser = null;
     task.assignedTask = null;
@@ -188,7 +198,12 @@ export class TaskService {
 
   async findOneBlank(id: string): Promise<Task> {
     const task = await Task.findOneBy({ id });
-    if (!task) throw new NotFoundException();
+    if (!task)
+      throw new NotFoundException({
+        message: {
+          task: "task not found"
+        }
+      });
 
     return task;
   }

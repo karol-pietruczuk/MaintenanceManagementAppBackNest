@@ -40,6 +40,20 @@ export interface CreateUserRequest
   assignedTeam: string[];
 }
 
+export interface UpdateUserRequest
+  extends Omit<UserInterface,
+    | "id"
+    | "pwdHash"
+    | "currentToken"
+    | "assignedTeam"
+    | "assignedTask"
+    | "createdTask"
+    | "taskToBeConfirm"
+    | "createdTaskComment"> {
+  pwd: string;
+  assignedTeam: string[];
+}
+
 export interface CreateUserResponse
   extends Omit<UserInterface,
     | "pwdHash"
@@ -58,3 +72,25 @@ export type FindAllUserResponse = Omit<UserInterface,
   | "taskToBeConfirm"
   | "createdTaskComment"
   | "phoneNumber">[];
+
+export interface FindOneUserResponse
+  extends Omit<UserInterface,
+    | "pwdHash"
+    | "currentToken"
+    | "createdTask"
+    | "taskToBeConfirm"
+    | "createdTaskComment"> {
+}
+
+export interface UpdateUserResponse
+  extends Omit<UserInterface,
+    | "pwdHash"
+    | "currentToken"
+    | "assignedTask"
+    | "createdTask"
+    | "taskToBeConfirm"
+    | "createdTaskComment"> {
+}
+
+export interface RemoveUserResponse extends Pick<UserInterface, "id"> {
+}

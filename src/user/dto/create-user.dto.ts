@@ -1,5 +1,5 @@
 import { CreateUserRequest, UserRole } from "../../types/user";
-import { IsNotEmpty, IsOptional, IsPhoneNumber, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional, IsPhoneNumber, IsString } from "class-validator";
 
 export class CreateUserDto implements CreateUserRequest {
   @IsOptional()
@@ -19,7 +19,7 @@ export class CreateUserDto implements CreateUserRequest {
   phoneNumber: string | null;
 
   @IsNotEmpty()
-  @IsString()
+  @IsEnum(UserRole)
   role: UserRole;
 
   @IsNotEmpty()

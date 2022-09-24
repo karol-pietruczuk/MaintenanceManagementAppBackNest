@@ -1,13 +1,13 @@
 import { TaskPriority, TaskStatus, UpdateTaskRequest } from "../../types";
-import { IsArray, IsIn, IsOptional, IsString } from "class-validator";
+import { IsArray, IsEnum, IsOptional, IsString } from "class-validator";
 
 export class UpdateTaskDto implements UpdateTaskRequest {
   @IsOptional()
-  @IsIn(Object.keys(TaskStatus))
+  @IsEnum(TaskStatus)
   status: TaskStatus;
 
   @IsOptional()
-  @IsIn(Object.keys(TaskPriority))
+  @IsEnum(TaskPriority)
   priority: TaskPriority;
 
   @IsOptional()

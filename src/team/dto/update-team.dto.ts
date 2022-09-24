@@ -1,5 +1,5 @@
 import { TeamPrivileges, UpdateTeamRequest } from "../../types/team";
-import { IsOptional, IsPhoneNumber, IsString } from "class-validator";
+import { IsEnum, IsOptional, IsPhoneNumber, IsString } from "class-validator";
 
 export class UpdateTeamDto implements UpdateTeamRequest {
   @IsOptional()
@@ -19,6 +19,6 @@ export class UpdateTeamDto implements UpdateTeamRequest {
   phoneNumber: string | null;
 
   @IsOptional()
-  @IsString()
+  @IsEnum(TeamPrivileges)
   teamPrivileges: TeamPrivileges;
 }
