@@ -1,6 +1,6 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+import { BadRequestException, ValidationPipe } from "@nestjs/common";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,7 +16,11 @@ async function bootstrap() {
       },
       exceptionFactory: (errors) => {
         console.log(errors);
-        return new BadRequestException(errors[0].constraints);
+        const message = {};
+        errors.forEach((error) => {
+          message[error.property] = Object.values(error.constraints)[0];
+        });
+        return new BadRequestException({ message });
       },
     }),
   );
