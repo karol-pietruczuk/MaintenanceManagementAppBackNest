@@ -7,6 +7,7 @@ import { TaskModule } from "./task/task.module";
 import { TeamModule } from "./team/team.module";
 import { UserModule } from "./user/user.module";
 import { TaskCommentModule } from "./task-comment/task-comment.module";
+import { AuthModule } from "./auth/auth.module";
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { TaskCommentModule } from "./task-comment/task-comment.module";
     TaskModule,
     TeamModule,
     UserModule,
-    TaskCommentModule
+    TaskCommentModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService]

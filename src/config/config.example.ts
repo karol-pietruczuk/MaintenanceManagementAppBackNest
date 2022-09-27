@@ -17,3 +17,5 @@
 //   algorithm: '',
 //   salt: '',
 // };
+//
+//export const secretToken = '';
