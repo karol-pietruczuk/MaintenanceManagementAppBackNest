@@ -1,5 +1,5 @@
-import { CreateTeamRequest, TeamPrivileges } from "../../types/team";
-import { IsEnum, IsNotEmpty, IsOptional, IsPhoneNumber, IsString } from "class-validator";
+import { CreateTeamRequest } from "../../types/team";
+import { IsNotEmpty, IsOptional, IsPhoneNumber, IsString } from "class-validator";
 
 export class CreateTeamDto implements CreateTeamRequest {
   @IsNotEmpty()
@@ -10,9 +10,9 @@ export class CreateTeamDto implements CreateTeamRequest {
   @IsPhoneNumber("PL")
   phoneNumber: string | null;
 
-  @IsNotEmpty()
-  @IsEnum(TeamPrivileges)
-  teamPrivileges: TeamPrivileges;
+  // @IsNotEmpty()
+  // @IsEnum(TeamPrivileges)
+  // teamPrivileges: TeamPrivileges;
 
   @IsOptional()
   @IsString({ each: true })

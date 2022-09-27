@@ -41,7 +41,7 @@ export class UserService {
       name: user.name,
       surname: user.surname,
       email: user.email,
-      role: user.role,
+      roles: user.roles,
       phoneNumber: user.phoneNumber,
       assignedTeam: user.assignedTeam
     };
@@ -55,7 +55,7 @@ export class UserService {
         name: user.name,
         surname: user.surname,
         email: user.email,
-        role: user.role,
+        roles: user.roles,
         assignedTeam: user.assignedTeam
       };
     }) as FindAllUserResponse;
@@ -80,7 +80,7 @@ export class UserService {
       name: user.name,
       surname: user.surname,
       email: user.email,
-      role: user.role,
+      roles: user.roles,
       phoneNumber: user.phoneNumber,
       assignedTeam: user.assignedTeam,
       assignedTask: user.assignedTask
@@ -120,7 +120,7 @@ export class UserService {
       name: user.name,
       surname: user.surname,
       email: user.email,
-      role: user.role,
+      roles: user.roles,
       phoneNumber: user.phoneNumber,
       assignedTeam: user.assignedTeam
     };

@@ -28,7 +28,7 @@ async function bootstrap() {
           });
           return new BadRequestException({ message });
         }
-      })
+      }),
     );
 
   await app.listen(3001);

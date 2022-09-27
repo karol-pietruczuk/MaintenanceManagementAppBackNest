@@ -29,7 +29,7 @@ export class User extends BaseEntity implements UserInterface {
   surname: string;
 
   @Column({
-    length: 255,
+    length: 255, //@TODO Check if 255 is right. Maybe 128 is enough
     nullable: false
   })
   pwdHash: string;
@@ -46,7 +46,7 @@ export class User extends BaseEntity implements UserInterface {
     nullable: false,
     default: UserRole.Production
   })
-  role: UserRole;
+  roles: UserRole;
 
   @ManyToMany((type) => Team, (entity) => entity.assignedUser)
   assignedTeam: Team[];
@@ -68,4 +68,8 @@ export class User extends BaseEntity implements UserInterface {
 
   @OneToMany((type) => TaskComment, (entity) => entity.createdBy)
   createdTaskComment: TaskComment[];
+
+  // @Column('simple-array')
+  @Column()
+  refreshToken: string;
 }

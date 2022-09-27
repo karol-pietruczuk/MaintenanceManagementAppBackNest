@@ -17,13 +17,14 @@ export interface UserInterface {
   surname: string;
   pwdHash: string;
   phoneNumber: string | null;
-  role: UserRole;
+  roles: UserRole;
   currentToken: string;
   assignedTeam: Team[];
   assignedTask: Task[];
   createdTask: Task[];
   taskToBeConfirm: Task[];
   createdTaskComment: TaskComment[];
+  refreshToken: string;
 }
 
 export interface CreateUserRequest
@@ -35,7 +36,8 @@ export interface CreateUserRequest
     | "assignedTask"
     | "createdTask"
     | "taskToBeConfirm"
-    | "createdTaskComment"> {
+    | "createdTaskComment"
+    | "refreshToken"> {
   pwd: string;
   assignedTeam: string[];
 }
@@ -49,7 +51,8 @@ export interface UpdateUserRequest
     | "assignedTask"
     | "createdTask"
     | "taskToBeConfirm"
-    | "createdTaskComment"> {
+    | "createdTaskComment"
+    | "refreshToken"> {
   pwd: string;
   assignedTeam: string[];
 }
@@ -61,7 +64,8 @@ export interface CreateUserResponse
     | "assignedTask"
     | "createdTask"
     | "taskToBeConfirm"
-    | "createdTaskComment"> {
+    | "createdTaskComment"
+    | "refreshToken"> {
 }
 
 export type FindAllUserResponse = Omit<UserInterface,
@@ -71,7 +75,8 @@ export type FindAllUserResponse = Omit<UserInterface,
   | "createdTask"
   | "taskToBeConfirm"
   | "createdTaskComment"
-  | "phoneNumber">[];
+  | "phoneNumber"
+  | "refreshToken">[];
 
 export interface FindOneUserResponse
   extends Omit<UserInterface,
@@ -79,7 +84,8 @@ export interface FindOneUserResponse
     | "currentToken"
     | "createdTask"
     | "taskToBeConfirm"
-    | "createdTaskComment"> {
+    | "createdTaskComment"
+    | "refreshToken"> {
 }
 
 export interface UpdateUserResponse
@@ -89,7 +95,8 @@ export interface UpdateUserResponse
     | "assignedTask"
     | "createdTask"
     | "taskToBeConfirm"
-    | "createdTaskComment"> {
+    | "createdTaskComment"
+    | "refreshToken"> {
 }
 
 export interface RemoveUserResponse extends Pick<UserInterface, "id"> {

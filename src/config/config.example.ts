@@ -19,3 +19,8 @@
 // };
 //
 //export const secretToken = '';
+//export const cookieConfig = {
+//  secure: false,
+//  domain: 'localhost',
+//  httpOnly: true,
+//};

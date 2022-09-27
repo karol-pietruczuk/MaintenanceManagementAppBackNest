@@ -1,4 +1,4 @@
-import { TeamInterface, TeamPrivileges } from "../../types/team";
+import { TeamInterface } from "../../types/team";
 import { BaseEntity, Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Task } from "../../task/entities/task.entity";
 import { User } from "../../user/entities/user.entity";
@@ -20,13 +20,13 @@ export class Team extends BaseEntity implements TeamInterface {
   })
   phoneNumber: string | null;
 
-  @Column({
-    type: "enum",
-    enum: TeamPrivileges,
-    default: TeamPrivileges.Production,
-    nullable: false
-  })
-  teamPrivileges: TeamPrivileges;
+  // @Column({
+  //   type: 'enum',
+  //   enum: TeamPrivileges,
+  //   default: TeamPrivileges.Production,
+  //   nullable: false,
+  // })
+  // teamPrivileges: TeamPrivileges;
 
   @ManyToMany((type) => User, (entity) => entity.assignedTeam)
   @JoinTable()

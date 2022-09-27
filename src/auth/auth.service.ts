@@ -6,7 +6,7 @@ import { JwtPayload } from "./jwt.strategy";
 import { sign } from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
 import { LoginAuthDto } from "./dto/login-auth.dto";
-import { secretToken } from "../config/config";
+import { cookieConfig, secretToken } from "../config/config";
 
 @Injectable()
 export class AuthService {
@@ -21,6 +21,7 @@ export class AuthService {
 
       if (!user) {
         return res
+          .clearCookie("jwt", cookieConfig)
           .status(401)
           .json({ message: { invalidData: "invalid login data" } });
       }
@@ -28,11 +29,7 @@ export class AuthService {
       const token = await this.createToken(await this.generateToken(user));
 
       return res
-        .cookie("jwt", token.accessToken, {
-          secure: false,
-          domain: "localhost",
-          httpOnly: true
-        })
+        .cookie("jwt", token.accessToken, cookieConfig)
         .status(201)
         .json({ ok: true });
       // @TODO Add there receiving refresh token
@@ -45,11 +42,7 @@ export class AuthService {
     try {
       user.currentToken = null;
       await user.save();
-      res.clearCookie("jwt", {
-        secure: false,
-        domain: "localhost",
-        httpOnly: true
-      });
+      res.clearCookie("jwt", cookieConfig);
       return res.status(200).json({ ok: true });
     } catch (e) {
       return res.status(500).json({ message: { error: e.message } });

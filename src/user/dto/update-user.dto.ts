@@ -24,7 +24,7 @@ export class UpdateUserDto implements UpdateUserRequest {
 
   @IsOptional()
   @IsEnum(UserRole)
-  role: UserRole;
+  roles: UserRole;
 
   @IsOptional()
   @IsString()

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { TaskService } from "./task.service";
 import { CreateTaskDto } from "./dto/create.task.dto";
 import {
@@ -10,6 +10,9 @@ import {
 } from "../types";
 import { FindAndCountTaskDto } from "./dto/find-and-count.task.dto";
 import { UpdateTaskDto } from "./dto/update.task.dto";
+import { Roles } from "../decorators/roles.decorator";
+import { UserRole } from "../types/user";
+import { RolesGuard } from "../guards/roles.guard";
 
 @Controller("task")
 export class TaskController {
@@ -22,6 +25,8 @@ export class TaskController {
   }
 
   @Get("/")
+  @Roles(UserRole.Technician)
+  @UseGuards(RolesGuard)
   findAndCount(
     @Body() findAndCountTaskDto: FindAndCountTaskDto
   ): Promise<FindAndCountTaskResponse> {

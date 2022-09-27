@@ -20,7 +20,7 @@ export class CreateUserDto implements CreateUserRequest {
 
   @IsNotEmpty()
   @IsEnum(UserRole)
-  role: UserRole;
+  roles: UserRole;
 
   @IsNotEmpty()
   @IsString()
