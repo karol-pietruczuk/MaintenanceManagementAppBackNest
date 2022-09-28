@@ -58,7 +58,7 @@ export class User extends BaseEntity implements UserInterface {
   @Column({
     nullable: true
   })
-  currentToken: string;
+  accessToken: string;
 
   @OneToMany((type) => Task, (entity) => entity.createdBy)
   createdTask: Task[];
@@ -70,6 +70,18 @@ export class User extends BaseEntity implements UserInterface {
   createdTaskComment: TaskComment[];
 
   // @Column('simple-array')
-  @Column()
+  @Column({
+    nullable: true
+  })
   refreshToken: string;
+
+  @Column({
+    nullable: true
+  })
+  accessTokenExpire: Date;
+
+  @Column({
+    nullable: true
+  })
+  refreshTokenTokenExpire: Date;
 }

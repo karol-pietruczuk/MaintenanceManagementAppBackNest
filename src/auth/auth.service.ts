@@ -3,20 +3,91 @@ import { Response } from "express";
 import { User } from "../user/entities/user.entity";
 import { hashPwd } from "../utils/hash-pwd";
 import { JwtPayload } from "./jwt.strategy";
-import { sign } from "jsonwebtoken";
+import { sign, verify } from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
-import { LoginAuthDto } from "./dto/login-auth.dto";
+import { LoginAuthDto } from "./dto/login.auth.dto";
 import { cookieConfig, secretToken } from "../config/config";
+
+interface IdTokensInterface {
+  accessTokenId: string;
+  refreshTokenId: string;
+}
 
 @Injectable()
 export class AuthService {
-  async login(req: LoginAuthDto, res: Response): Promise<any> {
+  private static async createTokens(
+    { accessTokenId, refreshTokenId }: IdTokensInterface,
+    user: User
+  ): Promise<{
+    accessToken: string;
+    accessTokenExpiresIn: number;
+    refreshToken: string;
+    refreshTokenExpiresIn: number;
+  }> {
+    const accessTokenPayload: JwtPayload = { id: accessTokenId };
+    const refreshTokenPayload: JwtPayload = { id: refreshTokenId };
+    const accessTokenExpiresIn = 60 * 60 * 24;
+    const refreshTokenExpiresIn = 60 * 60 * 24 * 60;
+    const accessToken = sign(accessTokenPayload, secretToken, {
+      expiresIn: accessTokenExpiresIn
+    });
+    const refreshToken = sign(refreshTokenPayload, secretToken, {
+      expiresIn: refreshTokenExpiresIn
+    });
+
+    user.accessToken = accessTokenId;
+    user.refreshToken = refreshTokenId;
+
+    user.accessTokenExpire = new Date(
+      new Date().getTime() + accessTokenExpiresIn * 1000
+    );
+    user.refreshTokenTokenExpire = new Date(
+      new Date().getTime() + refreshTokenExpiresIn * 1000
+    );
+
+    await user.save();
+
+    return {
+      accessToken,
+      accessTokenExpiresIn,
+      refreshToken,
+      refreshTokenExpiresIn
+    };
+  }
+
+  private static async generateTokens(): Promise<IdTokensInterface> {
+    let accessTokenId;
+    let refreshTokenId;
+    let userWithThisToken = null;
+
+    do {
+      accessTokenId = uuid();
+      userWithThisToken = await User.findOne({
+        where: [
+          { accessToken: accessTokenId },
+          { refreshToken: accessTokenId }
+        ]
+      });
+    } while (!!userWithThisToken);
+    userWithThisToken = null;
+    do {
+      refreshTokenId = uuid();
+      userWithThisToken = await User.findOne({
+        where: [
+          { accessToken: refreshTokenId },
+          { refreshToken: refreshTokenId }
+        ]
+      });
+    } while (!!userWithThisToken);
+
+    return { accessTokenId, refreshTokenId };
+  }
+
+  async login(loginAuthDto: LoginAuthDto, res: Response): Promise<Response> {
     try {
-      const user = await User.findOne({
-        where: {
-          email: req.email,
-          pwdHash: hashPwd(req.pwd)
-        }
+      const user = await User.findOneBy({
+        email: loginAuthDto.email,
+        pwdHash: hashPwd(loginAuthDto.pwd)
       });
 
       if (!user) {
@@ -26,55 +97,63 @@ export class AuthService {
           .json({ message: { invalidData: "invalid login data" } });
       }
 
-      const token = await this.createToken(await this.generateToken(user));
+      const token = await AuthService.createTokens(
+        await AuthService.generateTokens(),
+        user
+      );
 
       return res
         .cookie("jwt", token.accessToken, cookieConfig)
         .status(201)
-        .json({ ok: true });
-      // @TODO Add there receiving refresh token
+        .json({ jwt: token.refreshToken });
     } catch (e) {
       return res.status(500).json({ message: { error: e.message } });
     }
   }
 
-  async logout(user: User, res: Response) {
+  async logout(user: User, res: Response): Promise<Response> {
     try {
-      user.currentToken = null;
+      user.accessToken = null;
+      user.refreshToken = null;
       await user.save();
       res.clearCookie("jwt", cookieConfig);
-      return res.status(200).json({ ok: true });
+      return res.status(200).json();
     } catch (e) {
       return res.status(500).json({ message: { error: e.message } });
     }
   }
 
-  private createToken(currentTokenId: string): {
-    accessToken: string;
-    expiresIn: number;
-  } {
-    const payload: JwtPayload = { id: currentTokenId };
-    const expiresIn = 60 * 60 * 24;
-    const accessToken = sign(payload, secretToken, { expiresIn });
-    return {
-      accessToken,
-      expiresIn
-    };
-  }
-
-  private async generateToken(user: User): Promise<string> {
-    let token;
-    let userWithThisToken = null;
-
-    do {
-      token = uuid();
-      userWithThisToken = await User.findOne({
-        where: { currentToken: token }
+  async refresh(jwt: string, res: Response): Promise<Response> {
+    try {
+      const refreshToken = (verify(jwt, secretToken) as JwtPayload).id;
+      let user = await User.findOneBy({
+        refreshToken
       });
-    } while (!!userWithThisToken);
-    user.currentToken = token;
-    await user.save();
+      if (!user) {
+        user = await User.findOneBy({
+          accessToken: jwt
+        });
+        if (user) {
+          user.accessToken = null;
+          user.refreshToken = null;
+          await user.save();
+        }
+        return res
+          .clearCookie("jwt", cookieConfig)
+          .status(401)
+          .json({ message: { unauthorized: "access denied" } });
+      }
+      const token = await AuthService.createTokens(
+        await AuthService.generateTokens(),
+        user
+      );
 
-    return token;
+      return res
+        .cookie("jwt", token.accessToken, cookieConfig)
+        .status(201)
+        .json({ jwt: token.refreshToken });
+    } catch (e) {
+      return res.status(500).json({ message: { error: e.message } });
+    }
   }
 }

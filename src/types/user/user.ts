@@ -18,26 +18,30 @@ export interface UserInterface {
   pwdHash: string;
   phoneNumber: string | null;
   roles: UserRole;
-  currentToken: string;
+  accessToken: string;
   assignedTeam: Team[];
   assignedTask: Task[];
   createdTask: Task[];
   taskToBeConfirm: Task[];
   createdTaskComment: TaskComment[];
   refreshToken: string;
+  accessTokenExpire: Date;
+  refreshTokenTokenExpire: Date;
 }
 
 export interface CreateUserRequest
   extends Omit<UserInterface,
     | "id"
     | "pwdHash"
-    | "currentToken"
+    | "accessToken"
     | "assignedTeam"
     | "assignedTask"
     | "createdTask"
     | "taskToBeConfirm"
     | "createdTaskComment"
-    | "refreshToken"> {
+    | "refreshToken"
+    | "accessTokenExpire"
+    | "refreshTokenTokenExpire"> {
   pwd: string;
   assignedTeam: string[];
 }
@@ -46,13 +50,15 @@ export interface UpdateUserRequest
   extends Omit<UserInterface,
     | "id"
     | "pwdHash"
-    | "currentToken"
+    | "accessToken"
     | "assignedTeam"
     | "assignedTask"
     | "createdTask"
     | "taskToBeConfirm"
     | "createdTaskComment"
-    | "refreshToken"> {
+    | "refreshToken"
+    | "accessTokenExpire"
+    | "refreshTokenTokenExpire"> {
   pwd: string;
   assignedTeam: string[];
 }
@@ -60,43 +66,51 @@ export interface UpdateUserRequest
 export interface CreateUserResponse
   extends Omit<UserInterface,
     | "pwdHash"
-    | "currentToken"
+    | "accessToken"
     | "assignedTask"
     | "createdTask"
     | "taskToBeConfirm"
     | "createdTaskComment"
-    | "refreshToken"> {
+    | "refreshToken"
+    | "accessTokenExpire"
+    | "refreshTokenTokenExpire"> {
 }
 
 export type FindAllUserResponse = Omit<UserInterface,
   | "pwdHash"
-  | "currentToken"
+  | "accessToken"
   | "assignedTask"
   | "createdTask"
   | "taskToBeConfirm"
   | "createdTaskComment"
   | "phoneNumber"
-  | "refreshToken">[];
+  | "refreshToken"
+  | "accessTokenExpire"
+  | "refreshTokenTokenExpire">[];
 
 export interface FindOneUserResponse
   extends Omit<UserInterface,
     | "pwdHash"
-    | "currentToken"
+    | "accessToken"
     | "createdTask"
     | "taskToBeConfirm"
     | "createdTaskComment"
-    | "refreshToken"> {
+    | "refreshToken"
+    | "accessTokenExpire"
+    | "refreshTokenTokenExpire"> {
 }
 
 export interface UpdateUserResponse
   extends Omit<UserInterface,
     | "pwdHash"
-    | "currentToken"
+    | "accessToken"
     | "assignedTask"
     | "createdTask"
     | "taskToBeConfirm"
     | "createdTaskComment"
-    | "refreshToken"> {
+    | "refreshToken"
+    | "accessTokenExpire"
+    | "refreshTokenTokenExpire"> {
 }
 
 export interface RemoveUserResponse extends Pick<UserInterface, "id"> {
