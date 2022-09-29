@@ -36,6 +36,22 @@ export interface TaskInterface {
   comments: TaskComment[];
 }
 
+export class TaskRelations
+  implements Pick<TaskInterface,
+    | "createdBy"
+    | "toBeConfirmBy"
+    | "assignedTeam"
+    | "assignedUser"
+    | "assignedTask"
+    | "comments"> {
+  assignedTask: Task[];
+  assignedTeam: Team[];
+  assignedUser: User[];
+  comments: TaskComment[];
+  createdBy: User;
+  toBeConfirmBy: User;
+}
+
 export interface CreateTaskRequest
   extends Omit<TaskInterface,
     | "id"

@@ -1,13 +1,10 @@
-import { Body, Controller, Delete, Post, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Post, Req, Res, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { AuthGuard } from "@nestjs/passport";
 import { UserObj } from "../decorators/user-obj.decorator";
 import { User } from "../user/entities/user.entity";
 import { LoginAuthDto } from "./dto/login.auth.dto";
-import { UserRole } from "../types/user";
-import { Roles } from "../decorators/roles.decorator";
-import { RolesGuard } from "../guards/roles.guard";
 import { RefreshAuthDto } from "./dto/refresh.auth.dto";
 
 @Controller("auth")
@@ -18,23 +15,28 @@ export class AuthController {
   @Post()
   async login(
     @Body() loginAuthDto: LoginAuthDto,
-    @Res() res: Response
+    @Res() res: Response,
+    @Req() req: Request
   ): Promise<Response> {
-    return this.authService.login(loginAuthDto, res);
+    return this.authService.login(loginAuthDto, res, req);
   }
 
   @Delete()
-  @Roles(...Object.values(UserRole)) //@TODO Do usunięcia
-  @UseGuards(AuthGuard("jwt"), RolesGuard) //@TODO Do usunięcia
-  async logout(@UserObj() user: User, @Res() res: Response): Promise<Response> {
-    return this.authService.logout(user, res);
+  @UseGuards(AuthGuard("jwt"))
+  async logout(
+    @UserObj() user: User,
+    @Res() res: Response,
+    @Req() req: Request
+  ): Promise<Response> {
+    return this.authService.logout(user, res, req);
   }
 
   @Post("refresh")
   async refresh(
     @Body() { jwt }: RefreshAuthDto,
-    @Res() res: Response
+    @Res() res: Response,
+    @Req() req: Request
   ): Promise<Response> {
-    return this.authService.refresh(jwt, res);
+    return this.authService.refresh(jwt, res, req);
   }
 }

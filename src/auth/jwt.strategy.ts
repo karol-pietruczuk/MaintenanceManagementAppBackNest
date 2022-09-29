@@ -3,6 +3,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { User } from "../user/entities/user.entity";
 import { secretToken } from "../config/config";
+import { Like } from "typeorm";
 
 export interface JwtPayload {
   id: string;
@@ -27,7 +28,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
     const user = await User.findOne({
       where: {
-        accessToken: payload.id
+        accessToken: Like(`%${payload.id}%`)
       }
     });
     if (!user) {

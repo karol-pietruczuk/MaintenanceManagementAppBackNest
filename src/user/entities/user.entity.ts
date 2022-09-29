@@ -48,40 +48,37 @@ export class User extends BaseEntity implements UserInterface {
   })
   roles: UserRole;
 
-  @ManyToMany((type) => Team, (entity) => entity.assignedUser)
+  @ManyToMany(() => Team, (entity) => entity.assignedUser)
   assignedTeam: Team[];
 
-  @ManyToMany((type) => Task, (entity) => entity.assignedUser)
+  @ManyToMany(() => Task, (entity) => entity.assignedUser)
   @JoinTable()
   assignedTask: Task[];
 
-  @Column({
-    nullable: true
-  })
-  accessToken: string;
+  @Column("simple-array")
+  accessToken: string[];
 
-  @OneToMany((type) => Task, (entity) => entity.createdBy)
+  @OneToMany(() => Task, (entity) => entity.createdBy)
   createdTask: Task[];
 
-  @OneToMany((type) => Task, (entity) => entity.toBeConfirmBy)
+  @OneToMany(() => Task, (entity) => entity.toBeConfirmBy)
   taskToBeConfirm: Task[];
 
-  @OneToMany((type) => TaskComment, (entity) => entity.createdBy)
+  @OneToMany(() => TaskComment, (entity) => entity.createdBy)
   createdTaskComment: TaskComment[];
 
-  // @Column('simple-array')
-  @Column({
-    nullable: true
-  })
-  refreshToken: string;
+  @Column("simple-array")
+  refreshToken: string[];
 
-  @Column({
-    nullable: true
-  })
-  accessTokenExpire: Date;
+  @Column("simple-array")
+  accessTokenExpire: number[];
 
-  @Column({
-    nullable: true
-  })
-  refreshTokenTokenExpire: Date;
+  @Column("simple-array")
+  refreshTokenTokenExpire: number[];
+
+  @Column("simple-array")
+  ip: string[];
+
+  @Column("simple-array")
+  userAgent: string[];
 }

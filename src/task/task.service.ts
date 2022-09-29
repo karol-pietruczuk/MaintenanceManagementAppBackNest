@@ -5,11 +5,12 @@ import {
   FindAndCountTaskResponse,
   FindOneTaskResponse,
   RemoveTaskResponse,
+  TaskRelations,
   TaskStatus,
   UpdateTaskResponse
 } from "../types";
 import { Task } from "./entities/task.entity";
-import { assignProperties } from "../utils/accessory-functions";
+import { assignProperties, nullProperties } from "../utils/accessory-functions";
 import { FindAndCountTaskDto } from "./dto/find-and-count.task.dto";
 import { ILike, In } from "typeorm";
 import { UserService } from "../user/user.service";
@@ -177,12 +178,7 @@ export class TaskService {
           task: "task not found"
         }
       });
-    task.assignedTeam = null;
-    task.assignedUser = null;
-    task.assignedTask = null;
-    task.comments = null;
-    task.createdBy = null;
-    task.toBeConfirmBy = null;
+    nullProperties(task, new TaskRelations());
     await task.save();
     await task.remove();
     return { id };

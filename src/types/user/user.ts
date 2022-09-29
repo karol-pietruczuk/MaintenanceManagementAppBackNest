@@ -18,15 +18,33 @@ export interface UserInterface {
   pwdHash: string;
   phoneNumber: string | null;
   roles: UserRole;
-  accessToken: string;
+  accessToken: string[];
   assignedTeam: Team[];
   assignedTask: Task[];
   createdTask: Task[];
   taskToBeConfirm: Task[];
   createdTaskComment: TaskComment[];
-  refreshToken: string;
-  accessTokenExpire: Date;
-  refreshTokenTokenExpire: Date;
+  refreshToken: string[];
+  accessTokenExpire: number[];
+  refreshTokenTokenExpire: number[];
+  ip: string[];
+  userAgent: string[];
+}
+
+export class AuthData
+  implements Pick<UserInterface,
+    | "accessToken"
+    | "refreshToken"
+    | "accessTokenExpire"
+    | "refreshTokenTokenExpire"
+    | "ip"
+    | "userAgent"> {
+  accessToken: string[];
+  refreshToken: string[];
+  accessTokenExpire: number[];
+  refreshTokenTokenExpire: number[];
+  ip: string[];
+  userAgent: string[];
 }
 
 export interface CreateUserRequest
@@ -41,7 +59,9 @@ export interface CreateUserRequest
     | "createdTaskComment"
     | "refreshToken"
     | "accessTokenExpire"
-    | "refreshTokenTokenExpire"> {
+    | "refreshTokenTokenExpire"
+    | "ip"
+    | "userAgent"> {
   pwd: string;
   assignedTeam: string[];
 }
@@ -58,7 +78,9 @@ export interface UpdateUserRequest
     | "createdTaskComment"
     | "refreshToken"
     | "accessTokenExpire"
-    | "refreshTokenTokenExpire"> {
+    | "refreshTokenTokenExpire"
+    | "ip"
+    | "userAgent"> {
   pwd: string;
   assignedTeam: string[];
 }
@@ -73,7 +95,9 @@ export interface CreateUserResponse
     | "createdTaskComment"
     | "refreshToken"
     | "accessTokenExpire"
-    | "refreshTokenTokenExpire"> {
+    | "refreshTokenTokenExpire"
+    | "ip"
+    | "userAgent"> {
 }
 
 export type FindAllUserResponse = Omit<UserInterface,
@@ -86,7 +110,9 @@ export type FindAllUserResponse = Omit<UserInterface,
   | "phoneNumber"
   | "refreshToken"
   | "accessTokenExpire"
-  | "refreshTokenTokenExpire">[];
+  | "refreshTokenTokenExpire"
+  | "ip"
+  | "userAgent">[];
 
 export interface FindOneUserResponse
   extends Omit<UserInterface,
@@ -97,7 +123,9 @@ export interface FindOneUserResponse
     | "createdTaskComment"
     | "refreshToken"
     | "accessTokenExpire"
-    | "refreshTokenTokenExpire"> {
+    | "refreshTokenTokenExpire"
+    | "ip"
+    | "userAgent"> {
 }
 
 export interface UpdateUserResponse
@@ -110,7 +138,9 @@ export interface UpdateUserResponse
     | "createdTaskComment"
     | "refreshToken"
     | "accessTokenExpire"
-    | "refreshTokenTokenExpire"> {
+    | "refreshTokenTokenExpire"
+    | "ip"
+    | "userAgent"> {
 }
 
 export interface RemoveUserResponse extends Pick<UserInterface, "id"> {

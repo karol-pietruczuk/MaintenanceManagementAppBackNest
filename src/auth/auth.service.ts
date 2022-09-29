@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { User } from "../user/entities/user.entity";
 import { hashPwd } from "../utils/hash-pwd";
 import { JwtPayload } from "./jwt.strategy";
@@ -7,6 +7,9 @@ import { sign, verify } from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
 import { LoginAuthDto } from "./dto/login.auth.dto";
 import { cookieConfig, secretToken } from "../config/config";
+import { Like } from "typeorm";
+import { nullProperties } from "../utils/accessory-functions";
+import { AuthData } from "../types/user";
 
 interface IdTokensInterface {
   accessTokenId: string;
@@ -15,14 +18,32 @@ interface IdTokensInterface {
 
 @Injectable()
 export class AuthService {
-  private static async createTokens(
+  private static cleanAuthData = (
+    user: User,
+    ip: string,
+    userAgent: string
+  ) => {
+    const lastAuthDataIndex = user.ip.findIndex(
+      (oneIp, index) => oneIp === ip && user.userAgent[index] === userAgent
+    );
+
+    if (lastAuthDataIndex >= 0) {
+      user.accessToken.splice(lastAuthDataIndex, 1);
+      user.refreshToken.splice(lastAuthDataIndex, 1);
+      user.accessTokenExpire.splice(lastAuthDataIndex, 1);
+      user.refreshTokenTokenExpire.splice(lastAuthDataIndex, 1);
+      user.ip.splice(lastAuthDataIndex, 1);
+      user.userAgent.splice(lastAuthDataIndex, 1);
+    }
+  };
+
+  private static async generateUserAuthData(
     { accessTokenId, refreshTokenId }: IdTokensInterface,
-    user: User
+    user: User,
+    req: Request
   ): Promise<{
     accessToken: string;
-    accessTokenExpiresIn: number;
     refreshToken: string;
-    refreshTokenExpiresIn: number;
   }> {
     const accessTokenPayload: JwtPayload = { id: accessTokenId };
     const refreshTokenPayload: JwtPayload = { id: refreshTokenId };
@@ -35,23 +56,29 @@ export class AuthService {
       expiresIn: refreshTokenExpiresIn
     });
 
-    user.accessToken = accessTokenId;
-    user.refreshToken = refreshTokenId;
+    const userAgent =
+      typeof req.headers["user-agent"] === "string"
+        ? req.headers["user-agent"]
+        : req.headers["user-agent"][0];
 
-    user.accessTokenExpire = new Date(
+    AuthService.cleanAuthData(user, req.ip, userAgent);
+
+    user.accessToken.push(accessTokenId);
+    user.refreshToken.push(refreshTokenId);
+    user.accessTokenExpire.push(
       new Date().getTime() + accessTokenExpiresIn * 1000
     );
-    user.refreshTokenTokenExpire = new Date(
+    user.refreshTokenTokenExpire.push(
       new Date().getTime() + refreshTokenExpiresIn * 1000
     );
+    user.ip.push(req.ip);
+    user.userAgent.push(userAgent);
 
     await user.save();
 
     return {
       accessToken,
-      accessTokenExpiresIn,
-      refreshToken,
-      refreshTokenExpiresIn
+      refreshToken
     };
   }
 
@@ -83,7 +110,11 @@ export class AuthService {
     return { accessTokenId, refreshTokenId };
   }
 
-  async login(loginAuthDto: LoginAuthDto, res: Response): Promise<Response> {
+  async login(
+    loginAuthDto: LoginAuthDto,
+    res: Response,
+    req: Request
+  ): Promise<Response> {
     try {
       const user = await User.findOneBy({
         email: loginAuthDto.email,
@@ -97,9 +128,10 @@ export class AuthService {
           .json({ message: { invalidData: "invalid login data" } });
       }
 
-      const token = await AuthService.createTokens(
+      const token = await AuthService.generateUserAuthData(
         await AuthService.generateTokens(),
-        user
+        user,
+        req
       );
 
       return res
@@ -111,10 +143,15 @@ export class AuthService {
     }
   }
 
-  async logout(user: User, res: Response): Promise<Response> {
+  async logout(user: User, res: Response, req: Request): Promise<Response> {
     try {
-      user.accessToken = null;
-      user.refreshToken = null;
+      AuthService.cleanAuthData(
+        user,
+        req.ip,
+        typeof req.headers["user-agent"] === "string"
+          ? req.headers["user-agent"]
+          : req.headers["user-agent"][0]
+      );
       await user.save();
       res.clearCookie("jwt", cookieConfig);
       return res.status(200).json();
@@ -123,19 +160,18 @@ export class AuthService {
     }
   }
 
-  async refresh(jwt: string, res: Response): Promise<Response> {
+  async refresh(jwt: string, res: Response, req: Request): Promise<Response> {
     try {
       const refreshToken = (verify(jwt, secretToken) as JwtPayload).id;
       let user = await User.findOneBy({
-        refreshToken
+        refreshToken: Like(`%${refreshToken}%`)
       });
       if (!user) {
         user = await User.findOneBy({
-          accessToken: jwt
+          accessToken: Like(`%${refreshToken}%`)
         });
         if (user) {
-          user.accessToken = null;
-          user.refreshToken = null;
+          nullProperties(user, new AuthData());
           await user.save();
         }
         return res
@@ -143,9 +179,10 @@ export class AuthService {
           .status(401)
           .json({ message: { unauthorized: "access denied" } });
       }
-      const token = await AuthService.createTokens(
+      const token = await AuthService.generateUserAuthData(
         await AuthService.generateTokens(),
-        user
+        user,
+        req
       );
 
       return res
