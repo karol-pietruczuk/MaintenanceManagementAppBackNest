@@ -1,4 +1,4 @@
-import { CreateTaskCommentRequest } from "../../types/task-comment";
+import { CreateTaskCommentRequest } from "../../types";
 import { IsBoolean, IsNotEmpty, IsString } from "class-validator";
 
 export class CreateTaskCommentDto implements CreateTaskCommentRequest {

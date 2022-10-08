@@ -1,5 +1,5 @@
-import { UpdateTaskCommentRequest } from "../../types/task-comment";
 import { IsBoolean, IsOptional, IsString } from "class-validator";
+import { UpdateTaskCommentRequest } from "../../types";
 
 export class UpdateTaskCommentDto implements UpdateTaskCommentRequest {
   @IsString()

@@ -16,7 +16,7 @@ import { ILike, In } from "typeorm";
 import { UserService } from "../user/user.service";
 import { TeamService } from "../team/team.service";
 import { UpdateTaskDto } from "./dto/update.task.dto";
-import { TaskCommentService } from "../task-comment/task-comment.service";
+import { TaskCommentService } from "./task-comment.service";
 
 @Injectable()
 export class TaskService {

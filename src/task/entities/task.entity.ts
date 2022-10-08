@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn
 } from "typeorm";
 import { TaskInterface, TaskPriority, TaskStatus } from "../../types";
-import { TaskComment } from "../../task-comment/entities/task-comment.entity";
+import { TaskComment } from "./task-comment.entity";
 import { Team } from "../../team/entities/team.entity";
 import { User } from "../../user/entities/user.entity";
 import { TaskHistory } from "./task-history.entity";

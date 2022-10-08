@@ -2,7 +2,7 @@ import { UserInterface, UserRole } from "../../types/user";
 import { BaseEntity, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Team } from "../../team/entities/team.entity";
 import { Task } from "../../task/entities/task.entity";
-import { TaskComment } from "../../task-comment/entities/task-comment.entity";
+import { TaskComment } from "../../task/entities/task-comment.entity";
 import { TaskHistory } from "../../task/entities/task-history.entity";
 import { TaskSeen } from "../../task/entities/task-seen.entity";
 

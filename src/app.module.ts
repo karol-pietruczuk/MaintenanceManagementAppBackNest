@@ -6,7 +6,6 @@ import { dataSourceOptions } from "./config/config";
 import { TaskModule } from "./task/task.module";
 import { TeamModule } from "./team/team.module";
 import { UserModule } from "./user/user.module";
-import { TaskCommentModule } from "./task-comment/task-comment.module";
 import { AuthModule } from "./auth/auth.module";
 
 @Module({
@@ -15,7 +14,6 @@ import { AuthModule } from "./auth/auth.module";
     TaskModule,
     TeamModule,
     UserModule,
-    TaskCommentModule,
     AuthModule
   ],
   controllers: [AppController],

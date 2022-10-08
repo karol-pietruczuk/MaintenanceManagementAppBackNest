@@ -1,6 +1,6 @@
 import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Task } from "../../task/entities/task.entity";
-import { TaskCommentInterface } from "../../types/task-comment/task-comment";
+import { Task } from "./task.entity";
+import { TaskCommentInterface } from "../../types";
 import { User } from "../../user/entities/user.entity";
 
 @Entity()
@@ -13,7 +13,7 @@ export class TaskComment extends BaseEntity implements TaskCommentInterface {
   })
   description: string;
 
-  @ManyToOne((type) => User, (entity) => entity.createdTaskComment)
+  @ManyToOne(() => User, (entity) => entity.createdTaskComment)
   createdBy: User;
 
   @Column({
@@ -22,7 +22,7 @@ export class TaskComment extends BaseEntity implements TaskCommentInterface {
   })
   publicVisibility: boolean;
 
-  @ManyToOne((type) => Task, (entity) => entity.comments)
+  @ManyToOne(() => Task, (entity) => entity.comments)
   task: Task;
 
   @Column({
