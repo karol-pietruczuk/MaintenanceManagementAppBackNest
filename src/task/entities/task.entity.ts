@@ -12,6 +12,7 @@ import { TaskInterface, TaskPriority, TaskStatus } from "../../types";
 import { TaskComment } from "../../task-comment/entities/task-comment.entity";
 import { Team } from "../../team/entities/team.entity";
 import { User } from "../../user/entities/user.entity";
+import { TaskHistory } from "./task-history.entity";
 
 @Entity()
 export class Task extends BaseEntity implements TaskInterface {
@@ -44,19 +45,19 @@ export class Task extends BaseEntity implements TaskInterface {
   })
   priority: TaskPriority;
 
-  @ManyToOne((type) => User, (entity) => entity.createdTask)
+  @ManyToOne(() => User, (entity) => entity.createdTask)
   createdBy: User;
 
-  @ManyToOne((type) => User, (entity) => entity.taskToBeConfirm)
+  @ManyToOne(() => User, (entity) => entity.taskToBeConfirm)
   toBeConfirmBy: User;
 
-  @ManyToMany((type) => Team, (entity) => entity.assignedTask)
+  @ManyToMany(() => Team, (entity) => entity.assignedTask)
   assignedTeam: Team[];
 
-  @ManyToMany((type) => User, (entity) => entity.assignedTask)
+  @ManyToMany(() => User, (entity) => entity.assignedTask)
   assignedUser: User[];
 
-  @ManyToMany((type) => Task, (entity) => entity.assignedTask)
+  @ManyToMany(() => Task, (entity) => entity.assignedTask)
   @JoinTable()
   assignedTask: Task[];
 
@@ -75,8 +76,11 @@ export class Task extends BaseEntity implements TaskInterface {
   })
   changedAt: Date;
 
-  @OneToMany((type) => TaskComment, (entity) => entity.task)
+  @OneToMany(() => TaskComment, (entity) => entity.task)
   comments: TaskComment[];
+
+  @OneToMany(() => TaskHistory, (entity) => entity.task)
+  taskHistory: TaskHistory[];
 
   // @TODO Add there a field with relation ManyToMany with User to know user is working or not and know working time.
   // // Or maybe another entity/table.

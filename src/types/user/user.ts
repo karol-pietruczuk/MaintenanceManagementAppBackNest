@@ -1,6 +1,7 @@
 import { Team } from "../../team/entities/team.entity";
 import { Task } from "../../task/entities/task.entity";
 import { TaskComment } from "../../task-comment/entities/task-comment.entity";
+import { TaskHistory } from "../../task/entities/task-history.entity";
 
 export enum UserRole {
   Admin = "Admin",
@@ -29,6 +30,7 @@ export interface UserInterface {
   refreshTokenTokenExpire: number[];
   ip: string[];
   userAgent: string[];
+  taskHistory: TaskHistory[];
 }
 
 export class AuthData
@@ -61,7 +63,8 @@ export interface CreateUserRequest
     | "accessTokenExpire"
     | "refreshTokenTokenExpire"
     | "ip"
-    | "userAgent"> {
+    | "userAgent"
+    | "taskHistory"> {
   pwd: string;
   assignedTeam: string[];
 }
@@ -80,7 +83,8 @@ export interface UpdateUserRequest
     | "accessTokenExpire"
     | "refreshTokenTokenExpire"
     | "ip"
-    | "userAgent"> {
+    | "userAgent"
+    | "taskHistory"> {
   pwd: string;
   assignedTeam: string[];
 }
@@ -97,7 +101,8 @@ export interface CreateUserResponse
     | "accessTokenExpire"
     | "refreshTokenTokenExpire"
     | "ip"
-    | "userAgent"> {
+    | "userAgent"
+    | "taskHistory"> {
 }
 
 export type FindAllUserResponse = Omit<UserInterface,
@@ -112,7 +117,8 @@ export type FindAllUserResponse = Omit<UserInterface,
   | "accessTokenExpire"
   | "refreshTokenTokenExpire"
   | "ip"
-  | "userAgent">[];
+  | "userAgent"
+  | "taskHistory">[];
 
 export interface FindOneUserResponse
   extends Omit<UserInterface,
@@ -125,7 +131,8 @@ export interface FindOneUserResponse
     | "accessTokenExpire"
     | "refreshTokenTokenExpire"
     | "ip"
-    | "userAgent"> {
+    | "userAgent"
+    | "taskHistory"> {
 }
 
 export interface UpdateUserResponse
@@ -140,7 +147,8 @@ export interface UpdateUserResponse
     | "accessTokenExpire"
     | "refreshTokenTokenExpire"
     | "ip"
-    | "userAgent"> {
+    | "userAgent"
+    | "taskHistory"> {
 }
 
 export interface RemoveUserResponse extends Pick<UserInterface, "id"> {

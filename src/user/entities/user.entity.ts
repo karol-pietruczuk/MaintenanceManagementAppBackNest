@@ -3,6 +3,7 @@ import { BaseEntity, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGe
 import { Team } from "../../team/entities/team.entity";
 import { Task } from "../../task/entities/task.entity";
 import { TaskComment } from "../../task-comment/entities/task-comment.entity";
+import { TaskHistory } from "../../task/entities/task-history.entity";
 
 @Entity()
 export class User extends BaseEntity implements UserInterface {
@@ -81,4 +82,7 @@ export class User extends BaseEntity implements UserInterface {
 
   @Column("simple-array")
   userAgent: string[];
+
+  @OneToMany(() => TaskHistory, (entity) => entity.user)
+  taskHistory: TaskHistory[];
 }
