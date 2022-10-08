@@ -3,6 +3,7 @@ import { Task } from "../../task/entities/task.entity";
 import { User } from "../../user/entities/user.entity";
 import { TaskComment } from "../../task-comment/entities/task-comment.entity";
 import { TaskHistory } from "../../task/entities/task-history.entity";
+import { TaskSeen } from "../../task/entities/task-seen.entity";
 
 export enum TaskStatus {
   Reported = "Reported",
@@ -36,6 +37,7 @@ export interface TaskInterface {
   changedAt: Date;
   comments: TaskComment[];
   taskHistory: TaskHistory[];
+  taskSeen: TaskSeen[];
 }
 
 export class TaskRelations
@@ -67,7 +69,8 @@ export interface CreateTaskRequest
     | "createdBy"
     | "toBeConfirmBy"
     | "comments"
-    | "taskHistory"> {
+    | "taskHistory"
+    | "taskSeen"> {
   assignedTask: string[];
   assignedTeam: string[];
   assignedUser: string[];

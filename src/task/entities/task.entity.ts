@@ -13,6 +13,7 @@ import { TaskComment } from "../../task-comment/entities/task-comment.entity";
 import { Team } from "../../team/entities/team.entity";
 import { User } from "../../user/entities/user.entity";
 import { TaskHistory } from "./task-history.entity";
+import { TaskSeen } from "./task-seen.entity";
 
 @Entity()
 export class Task extends BaseEntity implements TaskInterface {
@@ -81,6 +82,9 @@ export class Task extends BaseEntity implements TaskInterface {
 
   @OneToMany(() => TaskHistory, (entity) => entity.task)
   taskHistory: TaskHistory[];
+
+  @OneToMany(() => TaskSeen, (entity) => entity.task)
+  taskSeen: TaskSeen[];
 
   // @TODO Add there a field with relation ManyToMany with User to know user is working or not and know working time.
   // // Or maybe another entity/table.

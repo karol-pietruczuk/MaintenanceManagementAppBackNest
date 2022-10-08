@@ -4,6 +4,7 @@ import { Team } from "../../team/entities/team.entity";
 import { Task } from "../../task/entities/task.entity";
 import { TaskComment } from "../../task-comment/entities/task-comment.entity";
 import { TaskHistory } from "../../task/entities/task-history.entity";
+import { TaskSeen } from "../../task/entities/task-seen.entity";
 
 @Entity()
 export class User extends BaseEntity implements UserInterface {
@@ -85,4 +86,7 @@ export class User extends BaseEntity implements UserInterface {
 
   @OneToMany(() => TaskHistory, (entity) => entity.user)
   taskHistory: TaskHistory[];
+
+  @OneToMany(() => TaskSeen, (entity) => entity.user)
+  taskSeen: TaskSeen[];
 }
