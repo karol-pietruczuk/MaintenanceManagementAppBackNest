@@ -4,10 +4,11 @@ import { TaskController } from "./task.controller";
 import { UserModule } from "../user/user.module";
 import { TeamModule } from "../team/team.module";
 import { TaskCommentService } from "./task-comment.service";
+import { TaskCommentController } from "./task-comment.controller";
 
 @Module({
   imports: [forwardRef(() => UserModule), forwardRef(() => TeamModule)],
-  controllers: [TaskController],
+  controllers: [TaskController, TaskCommentController],
   providers: [TaskService, TaskCommentService],
   exports: [TaskService]
 })

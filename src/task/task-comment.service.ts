@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { CreateTaskCommentDto } from "./dto/create-task-comment.dto";
-import { UpdateTaskCommentDto } from "./dto/update-task-comment.dto";
+import { CreateTaskCommentDto } from "./dto/task-comment/create.task-comment.dto";
+import { UpdateTaskCommentDto } from "./dto/task-comment/update.task-comment.dto";
 import { TaskComment } from "./entities/task-comment.entity";
 import { CreateTaskCommentResponse, RemoveTaskCommentResponse, UpdateTaskCommentResponse } from "../types";
 import { TaskService } from "./task.service";

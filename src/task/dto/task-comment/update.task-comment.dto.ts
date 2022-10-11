@@ -1,5 +1,5 @@
 import { IsBoolean, IsOptional, IsString } from "class-validator";
-import { UpdateTaskCommentRequest } from "../../types";
+import { UpdateTaskCommentRequest } from "../../../types";
 
 export class UpdateTaskCommentDto implements UpdateTaskCommentRequest {
   @IsString()

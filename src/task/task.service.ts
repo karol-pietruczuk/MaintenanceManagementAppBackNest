@@ -1,21 +1,25 @@
 import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { CreateTaskDto } from "./dto/create.task.dto";
+import { CreateTaskDto } from "./dto/task/create.task.dto";
 import {
+  AssignedTaskInterface,
   CreateTaskResponse,
   FindAndCountTaskResponse,
   FindOneTaskResponse,
+  ManyTasksResponse,
+  OneOfManyTasksResponse,
   RemoveTaskResponse,
   TaskRelations,
+  TaskResponse,
   TaskStatus,
   UpdateTaskResponse
 } from "../types";
 import { Task } from "./entities/task.entity";
 import { assignProperties, nullProperties } from "../utils/accessory-functions";
-import { FindAndCountTaskDto } from "./dto/find-and-count.task.dto";
+import { FindAndCountTaskDto } from "./dto/task/find-and-count.task.dto";
 import { ILike, In } from "typeorm";
 import { UserService } from "../user/user.service";
 import { TeamService } from "../team/team.service";
-import { UpdateTaskDto } from "./dto/update.task.dto";
+import { UpdateTaskDto } from "./dto/task/update.task.dto";
 import { TaskCommentService } from "./task-comment.service";
 
 @Injectable()
@@ -26,6 +30,51 @@ export class TaskService {
     @Inject(forwardRef(() => UserService)) private userService: UserService,
     @Inject(forwardRef(() => TeamService)) private teamService: TeamService
   ) {
+  }
+
+  private static filterTaskResponse(task: Task): TaskResponse {
+    return {
+      assignedTask: task.assignedTask.map(
+        (assignedTask): AssignedTaskInterface => {
+          return {
+            id: assignedTask.id,
+            name: assignedTask.name,
+            description: assignedTask.description,
+            status: assignedTask.status,
+            priority: assignedTask.priority,
+            createdAt: assignedTask.createdAt
+          };
+        }
+      ),
+      changedAt: task.changedAt,
+      comments: task.comments,
+      createdBy: task.createdBy,
+      toBeConfirmBy: task.toBeConfirmBy,
+      totalWorkTime: task.totalWorkTime,
+      id: task.id,
+      name: task.name,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      assignedTeam: task.assignedTeam,
+      assignedUser: task.assignedUser,
+      createdAt: task.createdAt
+    };
+  }
+
+  private static filterManyTasksResponse(tasks: Task[]): ManyTasksResponse {
+    return tasks.map((task): OneOfManyTasksResponse => {
+      return {
+        assignedTeam: task.assignedTeam,
+        assignedUser: task.assignedUser,
+        createdAt: task.createdAt,
+        description: task.description,
+        id: task.id,
+        name: task.name,
+        priority: task.priority,
+        status: task.status
+      };
+    });
   }
 
   async create(createTaskDto: CreateTaskDto): Promise<CreateTaskResponse> {
@@ -42,10 +91,12 @@ export class TaskService {
       createTaskDto.createdBy
     );
     task.createdBy = creator;
-    task.toBeConfirmBy = creator;
+    task.toBeConfirmBy = createTaskDto.toBeConfirmBy
+      ? await this.userService.findOneBlank(createTaskDto.toBeConfirmBy)
+      : creator;
     task.status = TaskStatus.Reported;
     await task.save();
-    return task;
+    return TaskService.filterTaskResponse(task);
   }
 
   async findAndCount(
@@ -89,7 +140,7 @@ export class TaskService {
 
     const totalPages = Math.ceil(totalTasksCount / findTaskDto.maxOnPage);
     return {
-      tasks,
+      tasks: TaskService.filterManyTasksResponse(tasks),
       totalPages,
       totalTasksCount
     };
@@ -114,15 +165,10 @@ export class TaskService {
         }
       });
 
-    // task.comments = await Promise.all(
-    //   task.comments.map(async (comment) => {
-    //     return this.taskCommentService.findOne(comment.id);
-    //   }),
-    // );
     task.comments = await this.taskCommentService.findMany(
       task.comments.map((comment) => comment.id)
     );
-    return task;
+    return TaskService.filterTaskResponse(task);
   }
 
   async update(
@@ -157,7 +203,7 @@ export class TaskService {
       )[0];
 
     await task.save();
-    return task;
+    return TaskService.filterTaskResponse(task);
   }
 
   async remove(id: string): Promise<RemoveTaskResponse> {

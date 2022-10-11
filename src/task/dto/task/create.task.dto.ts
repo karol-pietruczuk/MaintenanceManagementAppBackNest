@@ -1,4 +1,4 @@
-import { CreateTaskRequest, TaskPriority } from "../../types";
+import { CreateTaskRequest, TaskPriority } from "../../../types";
 import { IsArray, IsEnum, IsNotEmpty, IsString } from "class-validator";
 
 export class CreateTaskDto implements CreateTaskRequest {

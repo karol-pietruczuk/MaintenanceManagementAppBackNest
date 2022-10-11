@@ -1,4 +1,4 @@
-import { TaskPriority, TaskStatus, UpdateTaskRequest } from "../../types";
+import { TaskPriority, TaskStatus, UpdateTaskRequest } from "../../../types";
 import { IsArray, IsEnum, IsOptional, IsString } from "class-validator";
 
 export class UpdateTaskDto implements UpdateTaskRequest {

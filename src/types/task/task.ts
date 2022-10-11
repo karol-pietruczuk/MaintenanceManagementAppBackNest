@@ -57,20 +57,7 @@ export class TaskRelations
 }
 
 export interface CreateTaskRequest
-  extends Omit<TaskInterface,
-    | "id"
-    | "status"
-    | "assignedTask"
-    | "assignedTeam"
-    | "assignedUser"
-    | "totalWorkTime"
-    | "createdAt"
-    | "changedAt"
-    | "createdBy"
-    | "toBeConfirmBy"
-    | "comments"
-    | "taskHistory"
-    | "taskSeen"> {
+  extends Pick<TaskInterface, "name" | "description" | "priority"> {
   assignedTask: string[];
   assignedTeam: string[];
   assignedUser: string[];
@@ -96,19 +83,57 @@ export interface UpdateTaskRequest
   toBeConfirmBy: string;
 }
 
-export interface CreateTaskResponse extends TaskInterface {
+export interface AssignedTaskInterface
+  extends Pick<TaskInterface,
+    "id" | "name" | "description" | "status" | "priority" | "createdAt"> {
+}
+
+export interface TaskResponse
+  extends Pick<TaskInterface,
+    | "id"
+    | "name"
+    | "description"
+    | "status"
+    | "priority"
+    | "createdBy"
+    | "toBeConfirmBy"
+    | "assignedTeam"
+    | "assignedUser"
+    // | 'assignedTask'
+    | "totalWorkTime"
+    | "createdAt"
+    | "changedAt"
+    | "comments"> {
+  assignedTask: AssignedTaskInterface[];
+}
+
+export interface OneOfManyTasksResponse
+  extends Pick<TaskInterface,
+    | "id"
+    | "name"
+    | "description"
+    | "status"
+    | "priority"
+    | "assignedTeam"
+    | "assignedUser"
+    | "createdAt"> {
+}
+
+export type ManyTasksResponse = OneOfManyTasksResponse[];
+
+export interface CreateTaskResponse extends TaskResponse {
 }
 
 export type FindAndCountTaskResponse = {
-  tasks: TaskInterface[];
+  tasks: ManyTasksResponse;
   totalPages: number;
   totalTasksCount: number;
 };
 
-export interface FindOneTaskResponse extends TaskInterface {
+export interface FindOneTaskResponse extends TaskResponse {
 }
 
-export interface UpdateTaskResponse extends TaskInterface {
+export interface UpdateTaskResponse extends TaskResponse {
 }
 
 export interface RemoveTaskResponse extends Pick<TaskInterface, "id"> {

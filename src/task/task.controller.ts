@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { TaskService } from "./task.service";
-import { CreateTaskDto } from "./dto/create.task.dto";
+import { CreateTaskDto } from "./dto/task/create.task.dto";
 import {
   CreateTaskResponse,
   FindAndCountTaskResponse,
@@ -8,8 +8,8 @@ import {
   RemoveTaskResponse,
   UpdateTaskResponse
 } from "../types";
-import { FindAndCountTaskDto } from "./dto/find-and-count.task.dto";
-import { UpdateTaskDto } from "./dto/update.task.dto";
+import { FindAndCountTaskDto } from "./dto/task/find-and-count.task.dto";
+import { UpdateTaskDto } from "./dto/task/update.task.dto";
 import { Roles } from "../decorators/roles.decorator";
 import { UserRole } from "../types/user";
 import { RolesGuard } from "../guards/roles.guard";

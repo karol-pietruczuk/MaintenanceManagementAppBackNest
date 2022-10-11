@@ -1,5 +1,5 @@
 import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
-import { FindAndCountTaskRequest, TaskPriority, TaskStatus } from "../../types";
+import { FindAndCountTaskRequest, TaskPriority, TaskStatus } from "../../../types";
 
 export class FindAndCountTaskDto implements FindAndCountTaskRequest {
   @IsString()
