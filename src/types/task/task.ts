@@ -4,6 +4,9 @@ import { User } from "../../user/entities/user.entity";
 import { TaskComment } from "../../task/entities/task-comment.entity";
 import { TaskHistory } from "../../task/entities/task-history.entity";
 import { TaskSeen } from "../../task/entities/task-seen.entity";
+import { AssignedTeamResponse } from "../team";
+import { AssignedUserResponse } from "../user";
+import { TaskWorkTime } from "../../task/entities/task-work-time.entity";
 
 export enum TaskStatus {
   Reported = "Reported",
@@ -38,6 +41,7 @@ export interface TaskInterface {
   comments: TaskComment[];
   taskHistory: TaskHistory[];
   taskSeen: TaskSeen[];
+  taskWorkTime: TaskWorkTime[];
 }
 
 export class TaskRelations
@@ -47,13 +51,19 @@ export class TaskRelations
     | "assignedTeam"
     | "assignedUser"
     | "assignedTask"
-    | "comments"> {
+    | "taskHistory"
+    | "taskSeen"
+    | "comments"
+    | "taskWorkTime"> {
   assignedTask: Task[];
   assignedTeam: Team[];
   assignedUser: User[];
   comments: TaskComment[];
   createdBy: User;
   toBeConfirmBy: User;
+  taskHistory: TaskHistory[];
+  taskSeen: TaskSeen[];
+  taskWorkTime: TaskWorkTime[];
 }
 
 export interface CreateTaskRequest
@@ -83,10 +93,12 @@ export interface UpdateTaskRequest
   toBeConfirmBy: string;
 }
 
-export interface AssignedTaskInterface
+interface AssignedTask
   extends Pick<TaskInterface,
     "id" | "name" | "description" | "status" | "priority" | "createdAt"> {
 }
+
+export type AssignedTaskResponse = AssignedTask[];
 
 export interface TaskResponse
   extends Pick<TaskInterface,
@@ -97,29 +109,23 @@ export interface TaskResponse
     | "priority"
     | "createdBy"
     | "toBeConfirmBy"
-    | "assignedTeam"
-    | "assignedUser"
-    // | 'assignedTask'
     | "totalWorkTime"
     | "createdAt"
     | "changedAt"
     | "comments"> {
-  assignedTask: AssignedTaskInterface[];
+  assignedTask: AssignedTaskResponse;
+  assignedTeam: AssignedTeamResponse;
+  assignedUser: AssignedUserResponse;
 }
 
-export interface OneOfManyTasksResponse
+interface OneOfManyTaskResponse
   extends Pick<TaskInterface,
-    | "id"
-    | "name"
-    | "description"
-    | "status"
-    | "priority"
-    | "assignedTeam"
-    | "assignedUser"
-    | "createdAt"> {
+    "id" | "name" | "description" | "status" | "priority" | "createdAt"> {
+  assignedTeam: AssignedTeamResponse;
+  assignedUser: AssignedUserResponse;
 }
 
-export type ManyTasksResponse = OneOfManyTasksResponse[];
+export type ManyTasksResponse = OneOfManyTaskResponse[];
 
 export interface CreateTaskResponse extends TaskResponse {
 }

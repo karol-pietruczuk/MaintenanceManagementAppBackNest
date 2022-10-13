@@ -3,7 +3,13 @@ import { CreateTeamDto } from "./dto/create-team.dto";
 import { UpdateTeamDto } from "./dto/update-team.dto";
 import { In } from "typeorm";
 import { Team } from "./entities/team.entity";
-import { CreateTeamResponse, FindAllTeamResponse, RemoveTeamResponse, UpdateTeamResponse } from "../types/team";
+import {
+  AssignedTeamResponse,
+  CreateTeamResponse,
+  FindAllTeamResponse,
+  RemoveTeamResponse,
+  UpdateTeamResponse
+} from "../types/team";
 import { assignProperties } from "../utils/accessory-functions";
 import { UserService } from "../user/user.service";
 import { TaskService } from "../task/task.service";
@@ -14,6 +20,15 @@ export class TeamService {
     @Inject(forwardRef(() => TaskService)) private taskService: TaskService,
     @Inject(forwardRef(() => UserService)) private userService: UserService
   ) {
+  }
+
+  public filterAssignedTeam(teams: Team[]): AssignedTeamResponse {
+    return teams.map((team) => {
+      return {
+        id: team.id,
+        name: team.name
+      };
+    });
   }
 
   async create(createTeamDto: CreateTeamDto): Promise<CreateTeamResponse> {

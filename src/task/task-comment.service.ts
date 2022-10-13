@@ -32,6 +32,8 @@ export class TaskCommentService {
     await taskComment.save();
 
     return taskComment;
+    //@TODO Zmień tutaj dane zwracane. Zwracaj TaskResponse, a nie TaskComment! Użytkownik po dodaniu komentarza na
+    // froncie chce widzieć całe zadanie ze wszystkimi danymi, a nie jeden komentarz.
   }
 
   async update(

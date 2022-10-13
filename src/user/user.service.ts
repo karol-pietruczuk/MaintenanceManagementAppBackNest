@@ -7,10 +7,13 @@ import {
   CreateUserResponse,
   FindAllUserResponse,
   FindOneUserResponse,
+  ManyUserResponse,
   RemoveUserResponse,
-  UpdateUserResponse
+  UpdateUserResponse,
+  UserRelations,
+  UserResponse
 } from "../types/user";
-import { assignProperties } from "../utils/accessory-functions";
+import { assignProperties, nullProperties } from "../utils/accessory-functions";
 import { TeamService } from "../team/team.service";
 import { hashPwd } from "../utils/hash-pwd";
 
@@ -36,29 +39,16 @@ export class UserService {
         createUserDto.assignedTeam
       );
     await user.save();
-    return {
-      id: user.id,
-      name: user.name,
-      surname: user.surname,
-      email: user.email,
-      roles: user.roles,
-      phoneNumber: user.phoneNumber,
-      assignedTeam: user.assignedTeam
-    };
+    return this.filterUserResponse(user);
   }
 
   async findAll(): Promise<FindAllUserResponse> {
-    const users = await User.find();
-    return users.map((user) => {
-      return {
-        id: user.id,
-        name: user.name,
-        surname: user.surname,
-        email: user.email,
-        roles: user.roles,
-        assignedTeam: user.assignedTeam
-      };
-    }) as FindAllUserResponse;
+    const users = await User.find({
+      relations: {
+        assignedTeam: true
+      }
+    });
+    return this.filterManyUserResponse(users);
   }
 
   async findOne(id: string): Promise<FindOneUserResponse> {
@@ -75,16 +65,9 @@ export class UserService {
           user: "user not found"
         }
       });
-    return {
-      id: user.id,
-      name: user.name,
-      surname: user.surname,
-      email: user.email,
-      roles: user.roles,
-      phoneNumber: user.phoneNumber,
-      assignedTeam: user.assignedTeam,
-      assignedTask: user.assignedTask
-    };
+    // @TODO Dodaj wyliczenia totalWorkTime albo miesieczny czas pracy albo inne statystki
+
+    return this.filterUserResponse(user);
   }
 
   async update(
@@ -115,15 +98,7 @@ export class UserService {
         updateUserDto.assignedTeam
       );
     await user.save();
-    return {
-      id: user.id,
-      name: user.name,
-      surname: user.surname,
-      email: user.email,
-      roles: user.roles,
-      phoneNumber: user.phoneNumber,
-      assignedTeam: user.assignedTeam
-    };
+    return this.filterUserResponse(user);
   }
 
   async remove(id: string): Promise<RemoveUserResponse> {
@@ -140,8 +115,7 @@ export class UserService {
           user: "user not found"
         }
       });
-    user.assignedTask = null;
-    user.assignedTeam = null;
+    nullProperties(user, UserRelations);
     await user.save();
     await user.remove();
     return {
@@ -167,5 +141,39 @@ export class UserService {
       });
 
     return user;
+  }
+
+  private filterUserResponse(
+    user: User,
+    closedTask = 0,
+    createdTask = 0,
+    doneTask = 0,
+    totalWorkTime = 0
+  ): UserResponse {
+    return {
+      assignedTeam: this.teamService.filterAssignedTeam(user.assignedTeam),
+      closedTask,
+      createdTask,
+      doneTask,
+      email: user.email,
+      id: user.id,
+      name: user.name,
+      phoneNumber: user.phoneNumber,
+      roles: user.roles,
+      surname: user.surname,
+      totalWorkTime
+    };
+  }
+
+  private filterManyUserResponse(users: User[]): ManyUserResponse {
+    return users.map((user) => {
+      return {
+        id: user.id,
+        name: user.name,
+        surname: user.surname,
+        roles: user.roles,
+        assignedTeam: this.teamService.filterAssignedTeam(user.assignedTeam)
+      };
+    });
   }
 }

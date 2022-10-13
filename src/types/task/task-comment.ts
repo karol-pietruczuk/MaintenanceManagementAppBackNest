@@ -1,5 +1,6 @@
 import { Task } from "../../task/entities/task.entity";
 import { User } from "../../user/entities/user.entity";
+import { AssignedUser } from "../user";
 
 export interface TaskCommentInterface {
   id: string;
@@ -20,10 +21,22 @@ export interface UpdateTaskCommentRequest
   extends Pick<TaskCommentInterface, "description" | "publicVisibility"> {
 }
 
-export interface CreateTaskCommentResponse extends TaskCommentInterface {
+export interface AssignedTaskComment
+  extends Pick<TaskCommentInterface, "id" | "description" | "createdAt"> {
+  createdBy: AssignedUser;
 }
 
-export interface UpdateTaskCommentResponse extends TaskCommentInterface {
+export type AssignedTaskCommentResponse = AssignedTaskComment[];
+
+export interface TaskCommentResponse
+  extends Pick<TaskCommentInterface, "id" | "description" | "createdAt"> {
+  createdBy: AssignedUser;
+}
+
+export interface CreateTaskCommentResponse extends TaskCommentResponse {
+}
+
+export interface UpdateTaskCommentResponse extends TaskCommentResponse {
 }
 
 export interface RemoveTaskCommentResponse

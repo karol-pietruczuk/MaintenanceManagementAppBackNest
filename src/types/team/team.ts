@@ -1,44 +1,52 @@
 import { Task } from "../../task/entities/task.entity";
 import { User } from "../../user/entities/user.entity";
-
-// export enum TeamPrivileges {
-//   Production = 'Production',
-//   Technician = 'Technician',
-//   Warehouseman = 'Warehouseman',
-//   Manager = 'Manager',
-//   Admin = 'Admin',
-// }
+import { AssignedUserResponse } from "../user";
 
 export interface TeamInterface {
   id: string;
   name: string;
   phoneNumber: string | null;
-  // teamPrivileges: TeamPrivileges;
   assignedUser: User[];
   assignedTask: Task[];
 }
 
 export interface CreateTeamRequest
-  extends Omit<TeamInterface, "id" | "assignedUser" | "assignedTask"> {
+  extends Pick<TeamInterface, "name" | "phoneNumber"> {
   assignedUser: string[];
   assignedTask: string[];
 }
 
 export interface UpdateTeamRequest
-  extends Omit<TeamInterface, "id" | "assignedUser" | "assignedTask"> {
+  extends Pick<TeamInterface, "name" | "phoneNumber"> {
   assignedUser: string[];
   assignedTask: string[];
 }
 
-export interface CreateTeamResponse extends TeamInterface {
+interface AssignedTeam extends Pick<TeamInterface, "id" | "name"> {
 }
 
-export type FindAllTeamResponse = TeamInterface[];
+export type AssignedTeamResponse = AssignedTeam[];
 
-export interface FindOneTeamResponse extends TeamInterface {
+interface TeamResponse
+  extends Pick<TeamInterface, "id" | "name" | "phoneNumber"> {
+  assignedUser: AssignedUserResponse;
 }
 
-export interface UpdateTeamResponse extends TeamInterface {
+interface OneOfManyTeamResponse
+  extends Pick<TeamInterface, "id" | "name" | "phoneNumber"> {
+}
+
+type ManyUserResponse = OneOfManyTeamResponse[];
+
+export interface CreateTeamResponse extends TeamResponse {
+}
+
+export type FindAllTeamResponse = ManyUserResponse;
+
+export interface FindOneTeamResponse extends TeamResponse {
+}
+
+export interface UpdateTeamResponse extends TeamResponse {
 }
 
 export interface RemoveTeamResponse extends Pick<TeamInterface, "id"> {

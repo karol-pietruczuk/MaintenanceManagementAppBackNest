@@ -1,12 +1,11 @@
 import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateTaskDto } from "./dto/task/create.task.dto";
 import {
-  AssignedTaskInterface,
+  AssignedTaskResponse,
   CreateTaskResponse,
   FindAndCountTaskResponse,
   FindOneTaskResponse,
   ManyTasksResponse,
-  OneOfManyTasksResponse,
   RemoveTaskResponse,
   TaskRelations,
   TaskResponse,
@@ -32,20 +31,24 @@ export class TaskService {
   ) {
   }
 
+  static filterAssignedTaskResponse(
+    assignedTask: Task[]
+  ): AssignedTaskResponse {
+    return assignedTask.map((assignedTask) => {
+      return {
+        id: assignedTask.id,
+        name: assignedTask.name,
+        description: assignedTask.description,
+        status: assignedTask.status,
+        priority: assignedTask.priority,
+        createdAt: assignedTask.createdAt
+      };
+    });
+  }
+
   private static filterTaskResponse(task: Task): TaskResponse {
     return {
-      assignedTask: task.assignedTask.map(
-        (assignedTask): AssignedTaskInterface => {
-          return {
-            id: assignedTask.id,
-            name: assignedTask.name,
-            description: assignedTask.description,
-            status: assignedTask.status,
-            priority: assignedTask.priority,
-            createdAt: assignedTask.createdAt
-          };
-        }
-      ),
+      assignedTask: TaskService.filterAssignedTaskResponse(task.assignedTask),
       changedAt: task.changedAt,
       comments: task.comments,
       createdBy: task.createdBy,
@@ -63,7 +66,7 @@ export class TaskService {
   }
 
   private static filterManyTasksResponse(tasks: Task[]): ManyTasksResponse {
-    return tasks.map((task): OneOfManyTasksResponse => {
+    return tasks.map((task) => {
       return {
         assignedTeam: task.assignedTeam,
         assignedUser: task.assignedUser,

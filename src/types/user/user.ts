@@ -3,6 +3,8 @@ import { Task } from "../../task/entities/task.entity";
 import { TaskComment } from "../../task/entities/task-comment.entity";
 import { TaskHistory } from "../../task/entities/task-history.entity";
 import { TaskSeen } from "../../task/entities/task-seen.entity";
+import { AssignedTeamResponse } from "../team";
+import { TaskWorkTime } from "../../task/entities/task-work-time.entity";
 
 export enum UserRole {
   Admin = "Admin",
@@ -33,6 +35,27 @@ export interface UserInterface {
   userAgent: string[];
   taskHistory: TaskHistory[];
   taskSeen: TaskSeen[];
+  taskWorkTime: TaskWorkTime[];
+}
+
+export class UserRelations
+  implements Pick<UserInterface,
+    | "assignedTeam"
+    | "assignedTask"
+    | "createdTask"
+    | "taskToBeConfirm"
+    | "createdTaskComment"
+    | "taskHistory"
+    | "taskSeen"
+    | "taskWorkTime"> {
+  assignedTask: Task[];
+  assignedTeam: Team[];
+  createdTask: Task[];
+  createdTaskComment: TaskComment[];
+  taskHistory: TaskHistory[];
+  taskSeen: TaskSeen[];
+  taskToBeConfirm: Task[];
+  taskWorkTime: TaskWorkTime[];
 }
 
 export class AuthData
@@ -52,111 +75,51 @@ export class AuthData
 }
 
 export interface CreateUserRequest
-  extends Omit<UserInterface,
-    | "id"
-    | "pwdHash"
-    | "accessToken"
-    | "assignedTeam"
-    | "assignedTask"
-    | "createdTask"
-    | "taskToBeConfirm"
-    | "createdTaskComment"
-    | "refreshToken"
-    | "accessTokenExpire"
-    | "refreshTokenTokenExpire"
-    | "ip"
-    | "userAgent"
-    | "taskHistory"
-    | "taskSeen"> {
+  extends Pick<UserInterface,
+    "email" | "name" | "surname" | "phoneNumber" | "roles"> {
   pwd: string;
   assignedTeam: string[];
 }
 
 export interface UpdateUserRequest
-  extends Omit<UserInterface,
-    | "id"
-    | "pwdHash"
-    | "accessToken"
-    | "assignedTeam"
-    | "assignedTask"
-    | "createdTask"
-    | "taskToBeConfirm"
-    | "createdTaskComment"
-    | "refreshToken"
-    | "accessTokenExpire"
-    | "refreshTokenTokenExpire"
-    | "ip"
-    | "userAgent"
-    | "taskHistory"
-    | "taskSeen"> {
+  extends Pick<UserInterface,
+    "email" | "name" | "surname" | "phoneNumber" | "roles"> {
   pwd: string;
   assignedTeam: string[];
 }
 
-export interface CreateUserResponse
-  extends Omit<UserInterface,
-    | "pwdHash"
-    | "accessToken"
-    | "assignedTask"
-    | "createdTask"
-    | "taskToBeConfirm"
-    | "createdTaskComment"
-    | "refreshToken"
-    | "accessTokenExpire"
-    | "refreshTokenTokenExpire"
-    | "ip"
-    | "userAgent"
-    | "taskHistory"
-    | "taskSeen"> {
+export interface AssignedUser
+  extends Pick<UserInterface, "id" | "name" | "surname"> {
 }
 
-export type FindAllUserResponse = Omit<UserInterface,
-  | "pwdHash"
-  | "accessToken"
-  | "assignedTask"
-  | "createdTask"
-  | "taskToBeConfirm"
-  | "createdTaskComment"
-  | "phoneNumber"
-  | "refreshToken"
-  | "accessTokenExpire"
-  | "refreshTokenTokenExpire"
-  | "ip"
-  | "userAgent"
-  | "taskHistory"
-  | "taskSeen">[];
+export type AssignedUserResponse = AssignedUser[];
 
-export interface FindOneUserResponse
-  extends Omit<UserInterface,
-    | "pwdHash"
-    | "accessToken"
-    | "createdTask"
-    | "taskToBeConfirm"
-    | "createdTaskComment"
-    | "refreshToken"
-    | "accessTokenExpire"
-    | "refreshTokenTokenExpire"
-    | "ip"
-    | "userAgent"
-    | "taskHistory"
-    | "taskSeen"> {
+export interface UserResponse
+  extends Pick<UserInterface,
+    "name" | "id" | "email" | "surname" | "phoneNumber" | "roles"> {
+  assignedTeam: AssignedTeamResponse;
+  doneTask: number;
+  createdTask: number;
+  closedTask: number;
+  totalWorkTime: number;
 }
 
-export interface UpdateUserResponse
-  extends Omit<UserInterface,
-    | "pwdHash"
-    | "accessToken"
-    | "assignedTask"
-    | "createdTask"
-    | "taskToBeConfirm"
-    | "createdTaskComment"
-    | "refreshToken"
-    | "accessTokenExpire"
-    | "refreshTokenTokenExpire"
-    | "ip"
-    | "userAgent"
-    | "taskHistory"
-    | "taskSeen"> {
+interface OneOfManyUserResponse
+  extends Pick<UserInterface, "name" | "id" | "surname" | "roles"> {
+  assignedTeam: AssignedTeamResponse;
+}
+
+export type ManyUserResponse = OneOfManyUserResponse[];
+
+export interface CreateUserResponse extends UserResponse {
+}
+
+export type FindAllUserResponse = ManyUserResponse;
+
+export interface FindOneUserResponse extends UserResponse {
+}
+
+export interface UpdateUserResponse extends UserResponse {
 }
 
 export interface RemoveUserResponse extends Pick<UserInterface, "id"> {

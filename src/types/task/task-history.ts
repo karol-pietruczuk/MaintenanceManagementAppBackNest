@@ -1,5 +1,6 @@
 import { Task } from "../../task/entities/task.entity";
 import { User } from "../../user/entities/user.entity";
+import { AssignedUser } from "../user";
 
 export enum TaskHistoryAction {
   Created = "Created",
@@ -15,3 +16,10 @@ export interface TaskHistoryInterface {
   user: User;
   date: Date;
 }
+
+export interface AssignedTaskHistory
+  extends Pick<TaskHistoryInterface, "id" | "action" | "date"> {
+  user: AssignedUser;
+}
+
+export type AssignedTaskHistoryResponse = AssignedTaskHistory[];
