@@ -4,6 +4,7 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import { In } from "typeorm";
 import { User } from "./entities/user.entity";
 import {
+  AssignedUserResponse,
   CreateUserResponse,
   FindAllUserResponse,
   FindOneUserResponse,
@@ -22,6 +23,19 @@ export class UserService {
   constructor(
     @Inject(forwardRef(() => TeamService)) private teamService: TeamService
   ) {
+  }
+
+  filterAssignedUserResponse(users: User[]): AssignedUserResponse {
+    return users?.map((user) => {
+      return {
+        id: user.id,
+        name: user.name,
+        surname: user.surname,
+        assignedTeam: this.teamService.filterAssignedTeamResponse(
+          user.assignedTeam
+        )
+      };
+    });
   }
 
   async create(createUserDto: CreateUserDto): Promise<CreateUserResponse> {
@@ -46,6 +60,13 @@ export class UserService {
     const users = await User.find({
       relations: {
         assignedTeam: true
+      },
+      select: {
+        id: true,
+        name: true,
+        surname: true,
+        roles: true,
+        assignedTeam: { id: true, name: true }
       }
     });
     return this.filterManyUserResponse(users);
@@ -65,8 +86,6 @@ export class UserService {
           user: "user not found"
         }
       });
-    // @TODO Dodaj wyliczenia totalWorkTime albo miesieczny czas pracy albo inne statystki
-
     return this.filterUserResponse(user);
   }
 
@@ -81,10 +100,12 @@ export class UserService {
       }
     });
 
+    const userWithEmail = await User.findOneBy({ email: updateUserDto.email });
     if (
       updateUserDto.email &&
       user.email !== updateUserDto.email &&
-      (await User.findOneBy({ email: updateUserDto.email }))
+      userWithEmail &&
+      userWithEmail.id !== user.id
     )
       throw new ConflictException({
         message: {
@@ -115,7 +136,7 @@ export class UserService {
           user: "user not found"
         }
       });
-    nullProperties(user, UserRelations);
+    nullProperties(user, new UserRelations());
     await user.save();
     await user.remove();
     return {
@@ -126,13 +147,23 @@ export class UserService {
   async findMany(idArray: string[] | undefined | null): Promise<User[]> {
     return idArray
       ? await User.find({
-        where: { id: In(idArray) }
+        where: { id: In(idArray) },
+        relations: { assignedTeam: true },
+        select: {
+          id: true,
+          name: true,
+          surname: true,
+          assignedTeam: { id: true, name: true }
+        }
       })
       : null;
   }
 
   async findOneBlank(id: string): Promise<User> {
-    const user = await User.findOneBy({ id });
+    const user = await User.findOne({
+      where: { id },
+      relations: { assignedTeam: true }
+    });
     if (!user)
       throw new NotFoundException({
         message: {
@@ -143,36 +174,30 @@ export class UserService {
     return user;
   }
 
-  private filterUserResponse(
-    user: User,
-    closedTask = 0,
-    createdTask = 0,
-    doneTask = 0,
-    totalWorkTime = 0
-  ): UserResponse {
+  private filterUserResponse(user: User): UserResponse {
     return {
-      assignedTeam: this.teamService.filterAssignedTeam(user.assignedTeam),
-      closedTask,
-      createdTask,
-      doneTask,
+      assignedTeam: this.teamService.filterAssignedTeamResponse(
+        user.assignedTeam
+      ),
       email: user.email,
       id: user.id,
       name: user.name,
       phoneNumber: user.phoneNumber,
       roles: user.roles,
-      surname: user.surname,
-      totalWorkTime
+      surname: user.surname
     };
   }
 
   private filterManyUserResponse(users: User[]): ManyUserResponse {
-    return users.map((user) => {
+    return users?.map((user) => {
       return {
         id: user.id,
         name: user.name,
         surname: user.surname,
         roles: user.roles,
-        assignedTeam: this.teamService.filterAssignedTeam(user.assignedTeam)
+        assignedTeam: this.teamService.filterAssignedTeamResponse(
+          user.assignedTeam
+        )
       };
     });
   }

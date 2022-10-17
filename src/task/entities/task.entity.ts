@@ -63,9 +63,6 @@ export class Task extends BaseEntity implements TaskInterface {
   @JoinTable()
   assignedTask: Task[];
 
-  @Column()
-  totalWorkTime: number;
-
   @Column({
     default: () => "CURRENT_TIMESTAMP",
     nullable: false

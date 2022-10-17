@@ -22,26 +22,21 @@ export interface UpdateTeamRequest
   assignedTask: string[];
 }
 
-interface AssignedTeam extends Pick<TeamInterface, "id" | "name"> {
+export interface AssignedTeam extends Pick<TeamInterface, "id" | "name"> {
 }
 
 export type AssignedTeamResponse = AssignedTeam[];
 
-interface TeamResponse
+export interface TeamResponse
   extends Pick<TeamInterface, "id" | "name" | "phoneNumber"> {
   assignedUser: AssignedUserResponse;
 }
 
-interface OneOfManyTeamResponse
-  extends Pick<TeamInterface, "id" | "name" | "phoneNumber"> {
-}
-
-type ManyUserResponse = OneOfManyTeamResponse[];
-
 export interface CreateTeamResponse extends TeamResponse {
 }
 
-export type FindAllTeamResponse = ManyUserResponse;
+export type FindAllTeamResponse = Pick<TeamInterface,
+  "id" | "name" | "phoneNumber">[];
 
 export interface FindOneTeamResponse extends TeamResponse {
 }

@@ -1,12 +1,16 @@
 import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateTaskDto } from "./dto/task/create.task.dto";
 import {
+  AssignedTaskHistory,
   AssignedTaskResponse,
+  AssignedTaskSeen,
   CreateTaskResponse,
   FindAndCountTaskResponse,
   FindOneTaskResponse,
+  FindViewsAndHistoryResponse,
   ManyTasksResponse,
   RemoveTaskResponse,
+  TaskHistoryAction,
   TaskRelations,
   TaskResponse,
   TaskStatus,
@@ -20,6 +24,11 @@ import { UserService } from "../user/user.service";
 import { TeamService } from "../team/team.service";
 import { UpdateTaskDto } from "./dto/task/update.task.dto";
 import { TaskCommentService } from "./task-comment.service";
+import { TaskHistory } from "./entities/task-history.entity";
+import { User } from "../user/entities/user.entity";
+import { TaskSeen } from "./entities/task-seen.entity";
+import { TaskWorkTimeResponse } from "../types/task/task-work-time";
+import { TaskWorkTimeService } from "./task-work-time.service";
 
 @Injectable()
 export class TaskService {
@@ -27,7 +36,9 @@ export class TaskService {
     @Inject(forwardRef(() => TaskCommentService))
     private taskCommentService: TaskCommentService,
     @Inject(forwardRef(() => UserService)) private userService: UserService,
-    @Inject(forwardRef(() => TeamService)) private teamService: TeamService
+    @Inject(forwardRef(() => TeamService)) private teamService: TeamService,
+    @Inject(forwardRef(() => TaskWorkTimeService))
+    private taskWorkTimeService: TaskWorkTimeService
   ) {
   }
 
@@ -46,41 +57,10 @@ export class TaskService {
     });
   }
 
-  private static filterTaskResponse(task: Task): TaskResponse {
-    return {
-      assignedTask: TaskService.filterAssignedTaskResponse(task.assignedTask),
-      changedAt: task.changedAt,
-      comments: task.comments,
-      createdBy: task.createdBy,
-      toBeConfirmBy: task.toBeConfirmBy,
-      totalWorkTime: task.totalWorkTime,
-      id: task.id,
-      name: task.name,
-      description: task.description,
-      status: task.status,
-      priority: task.priority,
-      assignedTeam: task.assignedTeam,
-      assignedUser: task.assignedUser,
-      createdAt: task.createdAt
-    };
-  }
-
-  private static filterManyTasksResponse(tasks: Task[]): ManyTasksResponse {
-    return tasks.map((task) => {
-      return {
-        assignedTeam: task.assignedTeam,
-        assignedUser: task.assignedUser,
-        createdAt: task.createdAt,
-        description: task.description,
-        id: task.id,
-        name: task.name,
-        priority: task.priority,
-        status: task.status
-      };
-    });
-  }
-
-  async create(createTaskDto: CreateTaskDto): Promise<CreateTaskResponse> {
+  async create(
+    createTaskDto: CreateTaskDto,
+    user: User
+  ): Promise<CreateTaskResponse> {
     const task = new Task();
     assignProperties(createTaskDto, task);
     task.assignedTeam = await this.teamService.findMany(
@@ -90,16 +70,20 @@ export class TaskService {
       createTaskDto.assignedUser
     );
     task.assignedTask = await this.findMany(createTaskDto.assignedTask);
-    const creator = await this.userService.findOneBlank(
-      createTaskDto.createdBy
-    );
-    task.createdBy = creator;
+    task.createdBy = user;
     task.toBeConfirmBy = createTaskDto.toBeConfirmBy
       ? await this.userService.findOneBlank(createTaskDto.toBeConfirmBy)
-      : creator;
+      : user;
     task.status = TaskStatus.Reported;
     await task.save();
-    return TaskService.filterTaskResponse(task);
+
+    const taskHistory = new TaskHistory();
+    taskHistory.action = TaskHistoryAction.Created;
+    taskHistory.user = user;
+    taskHistory.task = task;
+    await taskHistory.save();
+
+    return this.filterTaskResponse(task);
   }
 
   async findAndCount(
@@ -108,7 +92,7 @@ export class TaskService {
     const [tasks, totalTasksCount] = await Task.findAndCount({
       relations: {
         assignedTeam: true,
-        assignedUser: true,
+        assignedUser: { assignedTeam: true },
         assignedTask: true,
         createdBy: true
       },
@@ -136,6 +120,27 @@ export class TaskService {
             : null
         }
       ],
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        status: true,
+        priority: true,
+        createdAt: true,
+        assignedTeam: { id: true, name: true },
+        assignedUser: {
+          id: true,
+          name: true,
+          surname: true,
+          assignedTeam: { id: true, name: true }
+        },
+        createdBy: {
+          id: true,
+          name: true,
+          surname: true,
+          assignedTeam: { id: true, name: true }
+        }
+      },
       skip: findTaskDto.maxOnPage * (findTaskDto.currentPage - 1),
       take: findTaskDto.maxOnPage
     });
@@ -143,23 +148,26 @@ export class TaskService {
 
     const totalPages = Math.ceil(totalTasksCount / findTaskDto.maxOnPage);
     return {
-      tasks: TaskService.filterManyTasksResponse(tasks),
+      tasks: this.filterManyTasksResponse(tasks),
       totalPages,
       totalTasksCount
     };
   }
 
-  async findOne(id: string): Promise<FindOneTaskResponse> {
+  async findOne(id: string, user: User): Promise<FindOneTaskResponse> {
     const task = await Task.findOne({
       where: { id },
       relations: {
-        comments: true,
+        comments: { createdBy: true },
         assignedTeam: true,
-        assignedUser: true,
+        assignedUser: { assignedTeam: true },
         assignedTask: true,
-        createdBy: true,
-        toBeConfirmBy: true
-      }
+        createdBy: { assignedTeam: true },
+        toBeConfirmBy: { assignedTeam: true },
+        taskSeen: { user: true },
+        taskWorkTime: { user: { assignedTeam: true } }
+      },
+      order: { taskWorkTime: { changedAt: "ASC", user: { id: "ASC" } } }
     });
     if (!task)
       throw new NotFoundException({
@@ -168,45 +176,88 @@ export class TaskService {
         }
       });
 
-    task.comments = await this.taskCommentService.findMany(
-      task.comments.map((comment) => comment.id)
+    if (
+      task.taskSeen.length === 0 ||
+      task.taskSeen.some((oneTaskSeen) => oneTaskSeen.user.id !== user.id)
+    ) {
+      const taskSeen = new TaskSeen();
+      taskSeen.user = user;
+      taskSeen.task = task;
+      await taskSeen.save();
+    }
+
+    return this.filterTaskResponse(
+      task,
+      this.taskWorkTimeService.mapTaskWorkTime(task.taskWorkTime)
     );
-    return TaskService.filterTaskResponse(task);
   }
 
   async update(
     id: string,
-    updateTaskDto: UpdateTaskDto
+    updateTaskDto: UpdateTaskDto,
+    user
   ): Promise<UpdateTaskResponse> {
     const task = await Task.findOne({
       where: { id },
       relations: {
-        comments: true,
+        comments: { createdBy: true },
         assignedTeam: true,
-        assignedUser: true,
+        assignedUser: { assignedTeam: true },
         assignedTask: true,
-        createdBy: true,
-        toBeConfirmBy: true
+        createdBy: { assignedTeam: true },
+        toBeConfirmBy: { assignedTeam: true },
+        taskWorkTime: { user: { assignedTeam: true } }
       }
     });
-    assignProperties(updateTaskDto, task);
-    if (updateTaskDto.assignedTeam)
+    let changed = assignProperties(updateTaskDto, task);
+
+    if (updateTaskDto.assignedTeam) {
       task.assignedTeam = await this.teamService.findMany(
         updateTaskDto.assignedTeam
       );
-    if (updateTaskDto.assignedUser)
+      changed = true;
+    }
+
+    if (updateTaskDto.assignedTask) {
+      task.assignedTask = await this.findMany(updateTaskDto.assignedTask);
+      changed = true;
+    }
+
+    if (updateTaskDto.toBeConfirmBy) {
+      task.toBeConfirmBy = await this.userService.findOneBlank(
+        updateTaskDto.toBeConfirmBy
+      );
+      changed = true;
+    }
+
+    if (updateTaskDto.assignedUser) {
       task.assignedUser = await this.userService.findMany(
         updateTaskDto.assignedUser
       );
-    if (updateTaskDto.assignedTask)
-      task.assignedTask = await this.findMany(updateTaskDto.assignedTask);
-    if (updateTaskDto.toBeConfirmBy)
-      task.toBeConfirmBy = (
-        await this.userService.findMany([updateTaskDto.toBeConfirmBy])
-      )[0];
+      changed = true;
+    }
 
     await task.save();
-    return TaskService.filterTaskResponse(task);
+
+    if (changed) {
+      const taskHistory = new TaskHistory();
+      taskHistory.action = TaskHistoryAction.Edited;
+      taskHistory.user = user;
+      taskHistory.task = task;
+      await taskHistory.save();
+    }
+    if (updateTaskDto.status && updateTaskDto.status !== task.status) {
+      const taskHistory = new TaskHistory();
+      taskHistory.action = TaskHistoryAction.StatusChanged;
+      taskHistory.user = user;
+      taskHistory.task = task;
+      await taskHistory.save();
+    }
+
+    return this.filterTaskResponse(
+      task,
+      this.taskWorkTimeService.mapTaskWorkTime(task.taskWorkTime)
+    );
   }
 
   async remove(id: string): Promise<RemoveTaskResponse> {
@@ -218,7 +269,10 @@ export class TaskService {
         assignedTask: true,
         comments: true,
         createdBy: true,
-        toBeConfirmBy: true
+        toBeConfirmBy: true,
+        taskSeen: true,
+        taskHistory: true,
+        taskWorkTime: true
       }
     });
     if (!task)
@@ -233,6 +287,53 @@ export class TaskService {
     return { id };
   }
 
+  async findViewsAndHistory(id: string): Promise<FindViewsAndHistoryResponse> {
+    const task = await Task.findOne({
+      where: { id },
+      relations: {
+        taskSeen: { user: { assignedTeam: true } },
+        taskHistory: { user: { assignedTeam: true } }
+      },
+      order: {
+        taskHistory: { date: "ASC" },
+        taskSeen: { date: "ASC" }
+      },
+      select: {
+        taskHistory: {
+          id: true,
+          date: true,
+          action: true,
+          user: {
+            id: true,
+            name: true,
+            surname: true,
+            assignedTeam: { id: true, name: true }
+          }
+        },
+        taskSeen: {
+          id: true,
+          date: true,
+          user: {
+            id: true,
+            name: true,
+            surname: true,
+            assignedTeam: { id: true, name: true }
+          }
+        }
+      }
+    });
+    if (!task)
+      throw new NotFoundException({
+        message: {
+          task: "task not found"
+        }
+      });
+    return {
+      assignedTaskHistory: this.filterTaskHistoryResponse(task.taskHistory),
+      assignedTaskSeen: this.filterTaskSeenResponse(task.taskSeen)
+    };
+  }
+
   async findMany(idArray: string[] | undefined | null): Promise<Task[]> {
     return idArray
       ? await Task.find({
@@ -242,7 +343,7 @@ export class TaskService {
   }
 
   async findOneBlank(id: string): Promise<Task> {
-    const task = await Task.findOneBy({ id });
+    const task = await Task.findOne({ where: { id }, select: { id: true } });
     if (!task)
       throw new NotFoundException({
         message: {
@@ -251,5 +352,81 @@ export class TaskService {
       });
 
     return task;
+  }
+
+  private filterTaskResponse(
+    task: Task,
+    taskWorkTime: TaskWorkTimeResponse = []
+  ): TaskResponse {
+    return {
+      assignedTask: TaskService.filterAssignedTaskResponse(task.assignedTask),
+      changedAt: task.changedAt,
+      comments: this.taskCommentService.filterAssignedTaskComment(
+        task.comments
+      ),
+      createdBy: this.userService.filterAssignedUserResponse([task.createdBy]),
+      toBeConfirmBy: this.userService.filterAssignedUserResponse([
+        task.toBeConfirmBy
+      ]),
+      id: task.id,
+      name: task.name,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      assignedTeam: this.teamService.filterAssignedTeamResponse(
+        task.assignedTeam
+      ),
+      assignedUser: this.userService.filterAssignedUserResponse(
+        task.assignedUser
+      ),
+      createdAt: task.createdAt,
+      taskWorkTime
+    };
+  }
+
+  private filterManyTasksResponse(tasks: Task[]): ManyTasksResponse {
+    return tasks?.map((task) => {
+      return {
+        assignedTeam: this.teamService.filterAssignedTeamResponse(
+          task.assignedTeam
+        ),
+        assignedUser: this.userService.filterAssignedUserResponse(
+          task.assignedUser
+        ),
+        createdAt: task.createdAt,
+        description: task.description,
+        id: task.id,
+        name: task.name,
+        priority: task.priority,
+        status: task.status
+      };
+    });
+  }
+
+  private filterTaskSeenResponse(taskSeen: TaskSeen[]): AssignedTaskSeen[] {
+    return taskSeen.map((oneTaskSeen) => {
+      return {
+        id: oneTaskSeen.id,
+        date: oneTaskSeen.date,
+        user: this.userService.filterAssignedUserResponse([
+          oneTaskSeen.user
+        ])[0]
+      };
+    });
+  }
+
+  private filterTaskHistoryResponse(
+    taskHistory: TaskHistory[]
+  ): AssignedTaskHistory[] {
+    return taskHistory.map((oneTaskHistory) => {
+      return {
+        id: oneTaskHistory.id,
+        action: oneTaskHistory.action,
+        date: oneTaskHistory.date,
+        user: this.userService.filterAssignedUserResponse([
+          oneTaskHistory.user
+        ])[0]
+      };
+    });
   }
 }

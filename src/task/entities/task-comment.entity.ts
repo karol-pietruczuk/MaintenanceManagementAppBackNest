@@ -18,7 +18,8 @@ export class TaskComment extends BaseEntity implements TaskCommentInterface {
 
   @Column({
     default: false,
-    nullable: false
+    nullable: false,
+    type: "boolean"
   })
   publicVisibility: boolean;
 

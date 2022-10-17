@@ -7,7 +7,9 @@ import {
   AssignedTeamResponse,
   CreateTeamResponse,
   FindAllTeamResponse,
+  FindOneTeamResponse,
   RemoveTeamResponse,
+  TeamResponse,
   UpdateTeamResponse
 } from "../types/team";
 import { assignProperties } from "../utils/accessory-functions";
@@ -22,8 +24,22 @@ export class TeamService {
   ) {
   }
 
-  public filterAssignedTeam(teams: Team[]): AssignedTeamResponse {
-    return teams.map((team) => {
+  private static async findOneTeam(id: string): Promise<Team> {
+    const team = await Team.findOne({
+      where: { id },
+      relations: { assignedUser: true, assignedTask: true }
+    });
+    if (!team)
+      throw new NotFoundException({
+        message: {
+          team: "team not found"
+        }
+      });
+    return team;
+  }
+
+  public filterAssignedTeamResponse(teams: Team[]): AssignedTeamResponse {
+    return teams?.map((team) => {
       return {
         id: team.id,
         name: team.name
@@ -47,34 +63,28 @@ export class TeamService {
       createTeamDto.assignedUser
     );
     await team.save();
-    return team;
+    return this.filterTeamResponse(team);
   }
 
   async findAll(): Promise<FindAllTeamResponse> {
-    return await Team.find({
-      relations: { assignedUser: true }
+    return (
+      await Team.find({
+        relations: { assignedUser: true }
+      })
+    ).map((team) => {
+      return { id: team.id, name: team.name, phoneNumber: team.phoneNumber };
     });
   }
 
-  async findOne(id: string): Promise<Team> {
-    const team = await Team.findOne({
-      where: { id },
-      relations: { assignedUser: true, assignedTask: true }
-    });
-    if (!team)
-      throw new NotFoundException({
-        message: {
-          team: "team not found"
-        }
-      });
-    return team;
+  async findOne(id: string): Promise<FindOneTeamResponse> {
+    return this.filterTeamResponse(await TeamService.findOneTeam(id));
   }
 
   async update(
     id: string,
     updateTeamDto: UpdateTeamDto
   ): Promise<UpdateTeamResponse> {
-    const team = await this.findOne(id);
+    const team = await TeamService.findOneTeam(id);
 
     if (
       updateTeamDto.name &&
@@ -101,7 +111,7 @@ export class TeamService {
   }
 
   async remove(id: string): Promise<RemoveTeamResponse> {
-    const team = await this.findOne(id);
+    const team = await TeamService.findOneTeam(id);
     team.assignedTask = null;
     team.assignedUser = null;
     await team.save();
@@ -117,5 +127,16 @@ export class TeamService {
         where: { id: In(idArray) }
       })
       : null;
+  }
+
+  private filterTeamResponse(team: Team): TeamResponse {
+    return {
+      id: team.id,
+      name: team.name,
+      assignedUser: this.userService.filterAssignedUserResponse(
+        team.assignedUser
+      ),
+      phoneNumber: team.phoneNumber
+    };
   }
 }

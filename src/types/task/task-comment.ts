@@ -11,9 +11,14 @@ export interface TaskCommentInterface {
   createdAt: Date;
 }
 
+export class TaskCommentRelations
+  implements Pick<TaskCommentInterface, "createdBy" | "task"> {
+  createdBy: User;
+  task: Task;
+}
+
 export interface CreateTaskCommentRequest
   extends Pick<TaskCommentInterface, "description" | "publicVisibility"> {
-  createdBy: string;
   taskId: string;
 }
 
@@ -21,17 +26,14 @@ export interface UpdateTaskCommentRequest
   extends Pick<TaskCommentInterface, "description" | "publicVisibility"> {
 }
 
-export interface AssignedTaskComment
+export interface TaskComment
   extends Pick<TaskCommentInterface, "id" | "description" | "createdAt"> {
   createdBy: AssignedUser;
 }
 
-export type AssignedTaskCommentResponse = AssignedTaskComment[];
+export type AssignedTaskCommentResponse = TaskComment[];
 
-export interface TaskCommentResponse
-  extends Pick<TaskCommentInterface, "id" | "description" | "createdAt"> {
-  createdBy: AssignedUser;
-}
+export type TaskCommentResponse = TaskComment[];
 
 export interface CreateTaskCommentResponse extends TaskCommentResponse {
 }

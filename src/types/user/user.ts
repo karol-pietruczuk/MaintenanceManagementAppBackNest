@@ -48,14 +48,14 @@ export class UserRelations
     | "taskHistory"
     | "taskSeen"
     | "taskWorkTime"> {
-  assignedTask: Task[];
-  assignedTeam: Team[];
-  createdTask: Task[];
-  createdTaskComment: TaskComment[];
-  taskHistory: TaskHistory[];
-  taskSeen: TaskSeen[];
-  taskToBeConfirm: Task[];
-  taskWorkTime: TaskWorkTime[];
+  assignedTask: Task[] = null;
+  assignedTeam: Team[] = null;
+  createdTask: Task[] = null;
+  createdTaskComment: TaskComment[] = null;
+  taskHistory: TaskHistory[] = null;
+  taskSeen: TaskSeen[] = null;
+  taskToBeConfirm: Task[] = null;
+  taskWorkTime: TaskWorkTime[] = null;
 }
 
 export class AuthData
@@ -66,13 +66,20 @@ export class AuthData
     | "refreshTokenTokenExpire"
     | "ip"
     | "userAgent"> {
-  accessToken: string[];
-  refreshToken: string[];
-  accessTokenExpire: number[];
-  refreshTokenTokenExpire: number[];
-  ip: string[];
-  userAgent: string[];
+  accessToken: string[] = null;
+  refreshToken: string[] = null;
+  accessTokenExpire: number[] = null;
+  refreshTokenTokenExpire: number[] = null;
+  ip: string[] = null;
+  userAgent: string[] = null;
 }
+
+export interface AssignedUser
+  extends Pick<UserInterface, "id" | "name" | "surname"> {
+  assignedTeam: AssignedTeamResponse;
+}
+
+export type AssignedUserResponse = AssignedUser[];
 
 export interface CreateUserRequest
   extends Pick<UserInterface,
@@ -88,20 +95,10 @@ export interface UpdateUserRequest
   assignedTeam: string[];
 }
 
-export interface AssignedUser
-  extends Pick<UserInterface, "id" | "name" | "surname"> {
-}
-
-export type AssignedUserResponse = AssignedUser[];
-
 export interface UserResponse
   extends Pick<UserInterface,
     "name" | "id" | "email" | "surname" | "phoneNumber" | "roles"> {
   assignedTeam: AssignedTeamResponse;
-  doneTask: number;
-  createdTask: number;
-  closedTask: number;
-  totalWorkTime: number;
 }
 
 interface OneOfManyUserResponse

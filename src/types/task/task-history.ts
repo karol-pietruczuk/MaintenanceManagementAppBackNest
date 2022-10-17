@@ -21,5 +21,3 @@ export interface AssignedTaskHistory
   extends Pick<TaskHistoryInterface, "id" | "action" | "date"> {
   user: AssignedUser;
 }
-
-export type AssignedTaskHistoryResponse = AssignedTaskHistory[];

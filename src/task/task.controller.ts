@@ -5,6 +5,7 @@ import {
   CreateTaskResponse,
   FindAndCountTaskResponse,
   FindOneTaskResponse,
+  FindViewsAndHistoryResponse,
   RemoveTaskResponse,
   UpdateTaskResponse
 } from "../types";
@@ -14,6 +15,8 @@ import { Roles } from "../decorators/roles.decorator";
 import { UserRole } from "../types/user";
 import { RolesGuard } from "../guards/roles.guard";
 import { AuthGuard } from "@nestjs/passport";
+import { UserObj } from "../decorators/user-obj.decorator";
+import { User } from "../user/entities/user.entity";
 
 @Controller("task")
 export class TaskController {
@@ -23,8 +26,11 @@ export class TaskController {
   @Roles(...Object.values(UserRole))
   @UseGuards(AuthGuard("jwt"), RolesGuard)
   @Post("/")
-  create(@Body() createTaskDto: CreateTaskDto): Promise<CreateTaskResponse> {
-    return this.taskService.create(createTaskDto);
+  create(
+    @Body() createTaskDto: CreateTaskDto,
+    @UserObj() user: User
+  ): Promise<CreateTaskResponse> {
+    return this.taskService.create(createTaskDto, user);
   }
 
   @Get("/")
@@ -39,8 +45,11 @@ export class TaskController {
   @Roles(...Object.values(UserRole))
   @UseGuards(AuthGuard("jwt"), RolesGuard)
   @Get("/:id")
-  findOne(@Param("id") id: string): Promise<FindOneTaskResponse> {
-    return this.taskService.findOne(id);
+  findOne(
+    @Param("id") id: string,
+    @UserObj() user: User
+  ): Promise<FindOneTaskResponse> {
+    return this.taskService.findOne(id, user);
   }
 
   @Roles(...Object.values(UserRole))
@@ -48,9 +57,10 @@ export class TaskController {
   @Patch("/:id")
   update(
     @Param("id") id: string,
-    @Body() updateTaskDto: UpdateTaskDto
+    @Body() updateTaskDto: UpdateTaskDto,
+    @UserObj() user: User
   ): Promise<UpdateTaskResponse> {
-    return this.taskService.update(id, updateTaskDto);
+    return this.taskService.update(id, updateTaskDto, user);
   }
 
   @Roles(UserRole.Admin)
@@ -58,5 +68,14 @@ export class TaskController {
   @Delete("/:id")
   remove(@Param("id") id: string): Promise<RemoveTaskResponse> {
     return this.taskService.remove(id);
+  }
+
+  @Roles(...Object.values(UserRole))
+  @UseGuards(AuthGuard("jwt"), RolesGuard)
+  @Get("/:id/stats")
+  findViewsAndHistory(
+    @Param("id") id: string
+  ): Promise<FindViewsAndHistoryResponse> {
+    return this.taskService.findViewsAndHistory(id);
   }
 }

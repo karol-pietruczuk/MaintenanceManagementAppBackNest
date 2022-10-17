@@ -29,6 +29,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const user = await User.findOne({
       where: {
         accessToken: Like(`%${payload.id}%`)
+      },
+      relations: {
+        assignedTeam: true
+      },
+      select: {
+        id: true,
+        name: true,
+        surname: true,
+        roles: true,
+        assignedTeam: {
+          id: true,
+          name: true
+        }
       }
     });
     if (!user) {

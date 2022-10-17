@@ -13,7 +13,7 @@ export class TaskSeen extends BaseEntity implements TaskSeenInterface {
 
   @Column({
     nullable: false,
-    type: "date"
+    default: () => "CURRENT_TIMESTAMP"
   })
   date: Date;
 

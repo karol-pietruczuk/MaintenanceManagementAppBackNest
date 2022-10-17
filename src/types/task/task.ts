@@ -7,6 +7,10 @@ import { TaskSeen } from "../../task/entities/task-seen.entity";
 import { AssignedTeamResponse } from "../team";
 import { AssignedUserResponse } from "../user";
 import { TaskWorkTime } from "../../task/entities/task-work-time.entity";
+import { AssignedTaskCommentResponse } from "./task-comment";
+import { TaskWorkTimeResponse } from "./task-work-time";
+import { AssignedTaskHistory } from "./task-history";
+import { AssignedTaskSeen } from "./task-seen";
 
 export enum TaskStatus {
   Reported = "Reported",
@@ -35,7 +39,6 @@ export interface TaskInterface {
   assignedTeam: Team[];
   assignedUser: User[];
   assignedTask: Task[];
-  totalWorkTime: number;
   createdAt: Date;
   changedAt: Date;
   comments: TaskComment[];
@@ -55,15 +58,15 @@ export class TaskRelations
     | "taskSeen"
     | "comments"
     | "taskWorkTime"> {
-  assignedTask: Task[];
-  assignedTeam: Team[];
-  assignedUser: User[];
-  comments: TaskComment[];
-  createdBy: User;
-  toBeConfirmBy: User;
-  taskHistory: TaskHistory[];
-  taskSeen: TaskSeen[];
-  taskWorkTime: TaskWorkTime[];
+  assignedTask: Task[] = null;
+  assignedTeam: Team[] = null;
+  assignedUser: User[] = null;
+  comments: TaskComment[] = null;
+  createdBy: User = null;
+  toBeConfirmBy: User = null;
+  taskHistory: TaskHistory[] = null;
+  taskSeen: TaskSeen[] = null;
+  taskWorkTime: TaskWorkTime[] = null;
 }
 
 export interface CreateTaskRequest
@@ -107,15 +110,15 @@ export interface TaskResponse
     | "description"
     | "status"
     | "priority"
-    | "createdBy"
-    | "toBeConfirmBy"
-    | "totalWorkTime"
     | "createdAt"
-    | "changedAt"
-    | "comments"> {
+    | "changedAt"> {
   assignedTask: AssignedTaskResponse;
   assignedTeam: AssignedTeamResponse;
   assignedUser: AssignedUserResponse;
+  createdBy: AssignedUserResponse;
+  toBeConfirmBy: AssignedUserResponse;
+  comments: AssignedTaskCommentResponse;
+  taskWorkTime: TaskWorkTimeResponse;
 }
 
 interface OneOfManyTaskResponse
@@ -143,4 +146,9 @@ export interface UpdateTaskResponse extends TaskResponse {
 }
 
 export interface RemoveTaskResponse extends Pick<TaskInterface, "id"> {
+}
+
+export interface FindViewsAndHistoryResponse {
+  assignedTaskHistory: AssignedTaskHistory[];
+  assignedTaskSeen: AssignedTaskSeen[];
 }

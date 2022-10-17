@@ -2,11 +2,19 @@ import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/commo
 import { CreateTaskCommentDto } from "./dto/task-comment/create.task-comment.dto";
 import { UpdateTaskCommentDto } from "./dto/task-comment/update.task-comment.dto";
 import { TaskComment } from "./entities/task-comment.entity";
-import { CreateTaskCommentResponse, RemoveTaskCommentResponse, UpdateTaskCommentResponse } from "../types";
+import {
+  AssignedTaskCommentResponse,
+  CreateTaskCommentResponse,
+  RemoveTaskCommentResponse,
+  TaskCommentRelations,
+  UpdateTaskCommentResponse
+} from "../types";
 import { TaskService } from "./task.service";
 import { UserService } from "../user/user.service";
 import { In } from "typeorm";
-import { assignProperties } from "../utils/accessory-functions";
+import { assignProperties, nullProperties } from "../utils/accessory-functions";
+import { User } from "../user/entities/user.entity";
+import { UserRole } from "../types/user";
 
 @Injectable()
 export class TaskCommentService {
@@ -16,24 +24,63 @@ export class TaskCommentService {
   ) {
   }
 
+  filterAssignedTaskComment(
+    taskComments: TaskComment[]
+  ): AssignedTaskCommentResponse {
+    return taskComments?.map((taskComment) => {
+      return {
+        id: taskComment.id,
+        description: taskComment.description,
+        createdAt: taskComment.createdAt,
+        createdBy: this.userService.filterAssignedUserResponse([
+          taskComment.createdBy
+        ])[0]
+      };
+    });
+  }
+
   async create(
-    createTaskCommentDto: CreateTaskCommentDto
+    createTaskCommentDto: CreateTaskCommentDto,
+    user: User
   ): Promise<CreateTaskCommentResponse> {
     const task = await this.taskService.findOneBlank(
       createTaskCommentDto.taskId
     );
-    const user = await this.userService.findOneBlank(
-      createTaskCommentDto.createdBy
-    );
+
     const taskComment = new TaskComment();
     assignProperties(createTaskCommentDto, taskComment);
     taskComment.task = task;
     taskComment.createdBy = user;
+
+    if (
+      taskComment.publicVisibility === false &&
+      (user.roles === UserRole.Production ||
+        user.roles === UserRole.Warehouseman)
+    )
+      taskComment.publicVisibility = true;
+
     await taskComment.save();
 
-    return taskComment;
-    //@TODO Zmień tutaj dane zwracane. Zwracaj TaskResponse, a nie TaskComment! Użytkownik po dodaniu komentarza na
-    // froncie chce widzieć całe zadanie ze wszystkimi danymi, a nie jeden komentarz.
+    return await TaskComment.find({
+      where: {
+        task: { id: task.id },
+        publicVisibility: [
+          UserRole.Admin,
+          UserRole.Manager,
+          UserRole.Technician
+        ].some((role) => role === user.roles)
+          ? In([true, false])
+          : true
+      },
+      relations: { createdBy: true },
+      select: {
+        createdBy: { id: true, name: true, surname: true },
+        id: true,
+        description: true,
+        createdAt: true
+      },
+      order: { createdAt: "ASC" }
+    });
   }
 
   async update(
@@ -41,36 +88,41 @@ export class TaskCommentService {
     updateTaskCommentDto: UpdateTaskCommentDto
   ): Promise<UpdateTaskCommentResponse> {
     const taskComment = await this.findOne(id);
+
     if (!!updateTaskCommentDto.description)
       taskComment.description = updateTaskCommentDto.description;
     if (updateTaskCommentDto.hasOwnProperty("publicVisibility"))
       taskComment.publicVisibility = updateTaskCommentDto.publicVisibility;
     await taskComment.save();
 
-    return taskComment;
+    return await TaskComment.find({
+      where: {
+        task: { id: taskComment.task.id }
+      },
+      relations: { createdBy: true },
+      select: {
+        createdBy: { id: true, name: true, surname: true },
+        id: true,
+        description: true,
+        createdAt: true
+      },
+      order: { createdAt: "ASC" }
+    });
   }
 
   async remove(id: string): Promise<RemoveTaskCommentResponse> {
     const taskComment = await this.findOne(id);
-    taskComment.task = null;
-    taskComment.createdBy = null;
+    nullProperties(taskComment, TaskCommentRelations);
     await taskComment.save();
     await taskComment.remove();
     return { id };
   }
 
-  async findMany(idArray: string[] | undefined | null): Promise<TaskComment[]> {
-    return idArray
-      ? await TaskComment.find({
-        where: { id: In(idArray) }
-      })
-      : null;
-  }
-
-  async findOne(id: string) {
+  async findOne(id: string): Promise<TaskComment> {
     const taskComment = await TaskComment.findOne({
       where: { id },
-      relations: { createdBy: true, task: true }
+      relations: { createdBy: true, task: true },
+      select: { createdBy: { id: true }, task: { id: true } }
     });
     if (!taskComment)
       throw new NotFoundException({

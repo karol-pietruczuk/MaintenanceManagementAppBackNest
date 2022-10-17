@@ -13,5 +13,3 @@ export interface AssignedTaskSeen
   extends Pick<TaskSeenInterface, "id" | "date"> {
   user: AssignedUser;
 }
-
-export type AssignedTaskSeenResponse = AssignedTaskSeen[];

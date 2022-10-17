@@ -7,24 +7,27 @@ import { Roles } from "../decorators/roles.decorator";
 import { UserRole } from "../types/user";
 import { AuthGuard } from "@nestjs/passport";
 import { RolesGuard } from "../guards/roles.guard";
+import { UserObj } from "../decorators/user-obj.decorator";
+import { User } from "../user/entities/user.entity";
 
-@Controller("task-comment")
+@Controller("task")
 export class TaskCommentController {
   constructor(private readonly taskCommentService: TaskCommentService) {
   }
 
   @Roles(...Object.values(UserRole))
   @UseGuards(AuthGuard("jwt"), RolesGuard)
-  @Post()
+  @Post("comment")
   create(
-    @Body() createTaskCommentDto: CreateTaskCommentDto
+    @Body() createTaskCommentDto: CreateTaskCommentDto,
+    @UserObj() user: User
   ): Promise<CreateTaskCommentResponse> {
-    return this.taskCommentService.create(createTaskCommentDto);
+    return this.taskCommentService.create(createTaskCommentDto, user);
   }
 
   @Roles(UserRole.Admin, UserRole.Manager)
   @UseGuards(AuthGuard("jwt"), RolesGuard)
-  @Patch(":id")
+  @Patch("comment/:id")
   update(
     @Param("id") commentId: string,
     @Body() updateTaskCommentDto: UpdateTaskCommentDto
@@ -34,7 +37,7 @@ export class TaskCommentController {
 
   @Roles(UserRole.Admin, UserRole.Manager)
   @UseGuards(AuthGuard("jwt"), RolesGuard)
-  @Delete(":id")
+  @Delete("comment/:id")
   remove(@Param("id") id: string): Promise<RemoveTaskCommentResponse> {
     return this.taskCommentService.remove(id);
   }

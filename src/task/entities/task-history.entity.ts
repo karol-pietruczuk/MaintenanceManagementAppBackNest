@@ -20,7 +20,7 @@ export class TaskHistory extends BaseEntity implements TaskHistoryInterface {
 
   @Column({
     nullable: false,
-    type: "date"
+    default: () => "CURRENT_TIMESTAMP"
   })
   date: Date;
 
