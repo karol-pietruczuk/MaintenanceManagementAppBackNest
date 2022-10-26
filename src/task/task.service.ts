@@ -144,7 +144,12 @@ export class TaskService {
       skip: findTaskDto.maxOnPage * (findTaskDto.currentPage - 1),
       take: findTaskDto.maxOnPage
     });
-    if (!tasks.length) throw new NotFoundException();
+    if (!tasks.length)
+      throw new NotFoundException({
+        message: {
+          task: "task not found"
+        }
+      });
 
     const totalPages = Math.ceil(totalTasksCount / findTaskDto.maxOnPage);
     return {
@@ -320,7 +325,7 @@ export class TaskService {
             assignedTeam: { id: true, name: true }
           }
         }
-      }
+      },
     });
     if (!task)
       throw new NotFoundException({

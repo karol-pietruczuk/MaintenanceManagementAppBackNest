@@ -137,7 +137,15 @@ export class AuthService {
       return res
         .cookie("jwt", token.accessToken, cookieConfig)
         .status(201)
-        .json({ jwt: token.refreshToken });
+        .json({
+          jwt: token.refreshToken,
+          user: {
+            name: user.name,
+            surname: user.surname,
+            email: user.email,
+            role: user.roles
+          }
+        });
     } catch (e) {
       return res.status(500).json({ message: { error: e.message } });
     }

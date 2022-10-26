@@ -24,3 +24,5 @@
 //  domain: 'localhost',
 //  httpOnly: true,
 //};
+//
+//export const corsConfig = { origin: '', credentials:  };
