@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { UserResponse } from "../user";
 
 export interface AuthLoginRequest {
   email: string;
@@ -11,14 +11,11 @@ export interface AuthRefreshRequest {
 
 export interface AuthLoginResponse {
   jwt: string;
-  user: {
-    name: string;
-    surname: string;
-    email: string;
-    role: string;
-  };
+  user: Pick<UserResponse, "name" | "id" | "surname" | "roles">;
 }
 
-export interface AuthRefreshResponse extends Response {
-  jwt: string;
+export interface AuthRefreshResponse extends AuthLoginResponse {
+}
+
+export interface AuthLogoutResponse {
 }

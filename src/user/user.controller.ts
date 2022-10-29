@@ -9,7 +9,7 @@ import {
   RemoveUserResponse,
   UpdateUserResponse,
   UserRole
-} from "../types/user";
+} from "../types";
 import { Roles } from "../decorators/roles.decorator";
 import { AuthGuard } from "@nestjs/passport";
 import { RolesGuard } from "../guards/roles.guard";

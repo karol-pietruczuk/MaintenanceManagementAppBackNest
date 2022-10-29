@@ -7,12 +7,12 @@ import {
   FindOneTaskResponse,
   FindViewsAndHistoryResponse,
   RemoveTaskResponse,
-  UpdateTaskResponse
+  UpdateTaskResponse,
+  UserRole
 } from "../types";
 import { FindAndCountTaskDto } from "./dto/task/find-and-count.task.dto";
 import { UpdateTaskDto } from "./dto/task/update.task.dto";
 import { Roles } from "../decorators/roles.decorator";
-import { UserRole } from "../types/user";
 import { RolesGuard } from "../guards/roles.guard";
 import { AuthGuard } from "@nestjs/passport";
 import { UserObj } from "../decorators/user-obj.decorator";

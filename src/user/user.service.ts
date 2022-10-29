@@ -13,7 +13,7 @@ import {
   UpdateUserResponse,
   UserRelations,
   UserResponse
-} from "../types/user";
+} from "../types";
 import { assignProperties, nullProperties } from "../utils/accessory-functions";
 import { TeamService } from "../team/team.service";
 import { hashPwd } from "../utils/hash-pwd";

@@ -1,4 +1,4 @@
-import { UserInterface, UserRole } from "../../types/user";
+import { UserInterface, UserRole } from "../../types";
 import { BaseEntity, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Team } from "../../team/entities/team.entity";
 import { Task } from "../../task/entities/task.entity";

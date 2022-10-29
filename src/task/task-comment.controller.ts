@@ -1,11 +1,10 @@
 import { Body, Controller, Delete, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { AuthGuard } from "@nestjs/passport";
 import { TaskCommentService } from "./task-comment.service";
 import { CreateTaskCommentDto } from "./dto/task-comment/create.task-comment.dto";
 import { UpdateTaskCommentDto } from "./dto/task-comment/update.task-comment.dto";
-import { CreateTaskCommentResponse, RemoveTaskCommentResponse, UpdateTaskCommentResponse } from "../types";
+import { CreateTaskCommentResponse, RemoveTaskCommentResponse, UpdateTaskCommentResponse, UserRole } from "../types";
 import { Roles } from "../decorators/roles.decorator";
-import { UserRole } from "../types/user";
-import { AuthGuard } from "@nestjs/passport";
 import { RolesGuard } from "../guards/roles.guard";
 import { UserObj } from "../decorators/user-obj.decorator";
 import { User } from "../user/entities/user.entity";

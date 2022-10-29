@@ -9,7 +9,7 @@ import { LoginAuthDto } from "./dto/login.auth.dto";
 import { cookieConfig, secretToken } from "../config/config";
 import { Like } from "typeorm";
 import { nullProperties } from "../utils/accessory-functions";
-import { AuthData } from "../types/user";
+import { AuthData, AuthLoginResponse } from "../types";
 
 interface IdTokensInterface {
   accessTokenId: string;
@@ -116,9 +116,12 @@ export class AuthService {
     req: Request
   ): Promise<Response> {
     try {
-      const user = await User.findOneBy({
-        email: loginAuthDto.email,
-        pwdHash: hashPwd(loginAuthDto.pwd)
+      const user = await User.findOne({
+        where: {
+          email: loginAuthDto.email,
+          pwdHash: hashPwd(loginAuthDto.pwd)
+        },
+        relations: { assignedTeam: true }
       });
 
       if (!user) {
@@ -143,9 +146,17 @@ export class AuthService {
             name: user.name,
             surname: user.surname,
             email: user.email,
-            role: user.roles
+            roles: user.roles,
+            id: user.id,
+            phoneNumber: user.phoneNumber,
+            assignedTeam: user.assignedTeam.map((team) => {
+              return {
+                id: team.id,
+                name: team.name
+              };
+            })
           }
-        });
+        } as AuthLoginResponse);
     } catch (e) {
       return res.status(500).json({ message: { error: e.message } });
     }

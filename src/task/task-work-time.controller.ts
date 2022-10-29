@@ -2,7 +2,7 @@ import { Body, Controller, Post, UseGuards } from "@nestjs/common";
 import { TaskWorkTimeService } from "./task-work-time.service";
 import { CreateTaskWorkTimeDto } from "./dto/task-work-time/create.task-work-time.dto";
 import { Roles } from "../decorators/roles.decorator";
-import { UserRole } from "../types/user";
+import { UserRole } from "../types";
 import { AuthGuard } from "@nestjs/passport";
 import { RolesGuard } from "../guards/roles.guard";
 import { CreateTaskWorkTimeResponse } from "../types/task/task-work-time";

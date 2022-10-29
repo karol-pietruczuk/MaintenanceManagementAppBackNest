@@ -7,14 +7,14 @@ import {
   CreateTaskCommentResponse,
   RemoveTaskCommentResponse,
   TaskCommentRelations,
-  UpdateTaskCommentResponse
+  UpdateTaskCommentResponse,
+  UserRole
 } from "../types";
 import { TaskService } from "./task.service";
 import { UserService } from "../user/user.service";
 import { In } from "typeorm";
 import { assignProperties, nullProperties } from "../utils/accessory-functions";
 import { User } from "../user/entities/user.entity";
-import { UserRole } from "../types/user";
 
 @Injectable()
 export class TaskCommentService {

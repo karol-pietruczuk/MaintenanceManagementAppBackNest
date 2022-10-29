@@ -11,7 +11,7 @@ import {
   RemoveTeamResponse,
   TeamResponse,
   UpdateTeamResponse
-} from "../types/team";
+} from "../types";
 import { assignProperties } from "../utils/accessory-functions";
 import { UserService } from "../user/user.service";
 import { TaskService } from "../task/task.service";
