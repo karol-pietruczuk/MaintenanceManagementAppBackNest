@@ -35,6 +35,7 @@ async function bootstrap() {
       }),
     );
 
-  await app.listen(3001);
+  // await app.listen(3001, '192.168.1.14');
+  await app.listen(3001, "localhost");
 }
 bootstrap();

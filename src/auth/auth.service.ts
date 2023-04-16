@@ -155,7 +155,7 @@ export class AuthService {
                 name: team.name
               };
             })
-          }
+          },
         } as AuthLoginResponse);
     } catch (e) {
       return res.status(500).json({ message: { error: e.message } });
@@ -182,17 +182,47 @@ export class AuthService {
   async refresh(jwt: string, res: Response, req: Request): Promise<Response> {
     try {
       const refreshToken = (verify(jwt, secretToken) as JwtPayload).id;
-      let user = await User.findOneBy({
+      const accessToken = req?.cookies?.jwt;
+
+      const firstWrongUser = await User.findOneBy({
+        refreshToken: Like(`%${accessToken}%`)
+      });
+
+      const secondWrongUser = await User.findOneBy({
+        accessToken: Like(`%${refreshToken}%`)
+      });
+
+      const firstRightUser = await User.findOneBy({
         refreshToken: Like(`%${refreshToken}%`)
       });
-      if (!user) {
-        user = await User.findOneBy({
-          accessToken: Like(`%${refreshToken}%`)
-        });
-        if (user) {
-          nullProperties(user, new AuthData());
-          await user.save();
-        }
+
+      const secondRightUser = await User.findOneBy({
+        accessToken: Like(`%${accessToken}%`)
+      });
+
+      let userError = false;
+
+      if (firstWrongUser) {
+        nullProperties(firstWrongUser, new AuthData());
+        await firstWrongUser.save();
+        userError = true;
+      }
+
+      if (secondWrongUser) {
+        nullProperties(secondWrongUser, new AuthData());
+        await secondWrongUser.save();
+        userError = true;
+      }
+
+      //@TODO Popraw
+
+      if (!firstRightUser?.accessToken.some(accessToken)) {
+        nullProperties(firstRightUser, new AuthData());
+        await firstRightUser.save();
+        userError = true;
+      }
+
+      if (userError) {
         return res
           .clearCookie("jwt", cookieConfig)
           .status(401)
@@ -200,7 +230,7 @@ export class AuthService {
       }
       const token = await AuthService.generateUserAuthData(
         await AuthService.generateTokens(),
-        user,
+        firstRightUser,
         req
       );
 
@@ -209,7 +239,8 @@ export class AuthService {
         .status(201)
         .json({ jwt: token.refreshToken });
     } catch (e) {
-      return res.status(500).json({ message: { error: e.message } });
+      console.error(e);
+      return res.status(500).json({ message: "Something went wrong" });
     }
   }
 }
